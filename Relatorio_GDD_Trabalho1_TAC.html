@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDD - Rust & Byte: O Despertar da Sucata | Trabalho 1 - TAC</title>
+    
+    <!-- MathJax para renderização de fórmulas matemáticas -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Mermaid.js para renderização de diagramas -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            themeVariables: {
+                primaryColor: '#e0ecff',
+                edgeColor: '#334155',
+                fontSize: '13px'
+            }
+        });
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #0f172a;
+            --accent: #d97706;
+            --accent-light: #fef3c7;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --bg-card: #f8fafc;
+            --border-color: #e2e8f0;
+            --table-header: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            line-height: 1.65;
+            color: var(--text-main);
+            background-color: #f1f5f9;
+            padding: 24px;
+        }
+
+        .page-container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 48px 56px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Capa Acadêmica */
+        .cover-page {
+            text-align: center;
+            padding: 40px 0 60px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        .cover-institution {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .cover-course {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .cover-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.25;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .cover-subtitle {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 50px;
+        }
+
+        .cover-meta {
+            margin-top: 40px;
+            display: inline-block;
+            text-align: left;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 20px 28px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .cover-meta p {
+            margin: 4px 0;
+        }
+
+        .cover-meta strong {
+            color: var(--primary-dark);
+        }
+
+        /* Títulos de Seção */
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            border-left: 5px solid var(--accent);
+            padding-left: 12px;
+            margin: 36px 0 16px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 22px 0 10px 0;
+        }
+
+        h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin: 16px 0 8px 0;
+        }
+
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin: 10px 0 16px 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0 24px 0;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--table-header);
+            color: #ffffff;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Destaques e Boxes */
+        .callout {
+            background-color: var(--accent-light);
+            border-left: 4px solid var(--accent);
+            padding: 14px 18px;
+            border-radius: 0 6px 6px 0;
+            margin: 18px 0;
+            font-size: 13.5px;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+
+        .formula-box {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        /* Tags de prioridade MoSCoW */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge-must {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+
+        .badge-should {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fbbf24;
+        }
+
+        /* Diagramas */
+        .diagram-container {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto !important;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .diagram-caption {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Código inline */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #b91c1c;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Estilos de Impressão / Exportação PDF */
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+                font-size: 11pt;
+            }
+
+            .page-container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            h2 {
+                margin-top: 28px;
+                page-break-after: avoid;
+            }
+
+            h3, h4 {
+                page-break-after: avoid;
+            }
+
+            table, .diagram-container, .formula-box, .callout {
+                page-break-inside: avoid;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 20mm 15mm 20mm 15mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- CAPA ACADÊMICA -->
+    <header class="cover-page">
+        <div class="cover-institution">DEPARTAMENTO DE INFORMÁTICA / CIÊNCIA DA COMPUTAÇÃO</div>
+        <div class="cover-course">DISCIPLINA: TÓPICOS AVANÇADOS EM COMPUTAÇÃO (TAC) / JOGOS DIGITAIS</div>
+        
+        <h1 class="cover-title">GAME DESIGN DOCUMENT (GDD)</h1>
+        <div class="cover-subtitle">RUST & BYTE: O DESPERTAR DA SUCATA</div>
+
+        <div class="cover-meta">
+            <p><strong>Orientador / Docente:</strong> Prof. Vanderson</p>
+            <p><strong>Autor / Discente:</strong> Vitor de Souza</p>
+            <p><strong>Trabalho:</strong> Trabalho 1 – Especificação e Modelagem de Jogo 2D</p>
+            <p><strong>Gênero / Estilo:</strong> Plataforma de Ação 2D (<em>Run and Gun</em>)</p>
+            <p><strong>Plataforma Alvo:</strong> PC (Microsoft Windows)</p>
+            <p><strong>Data de Entrega:</strong> 15 de Setembro de 2026</p>
+        </div>
+    </header>
+
+    <!-- SEÇÃO 1: IDENTIFICAÇÃO E VISÃO GERAL -->
+    <section>
+        <h2>1. Identificação e Visão Geral</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Item</th>
+                    <th>Especificação Técnica</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Título do Projeto</strong></td>
+                    <td><em>Rust & Byte: O Despertar da Sucata</em> (Nome Internacional: <em>Rust & Byte: Scrap Awakening</em>)</td>
+                </tr>
+                <tr>
+                    <td><strong>Gênero / Subgênero</strong></td>
+                    <td>Ação e Plataforma 2D / <em>Run and Gun</em> com progressão lateral contínua</td>
+                </tr>
+                <tr>
+                    <td><strong>Inspirações de Gameplay</strong></td>
+                    <td><em>Cuphead</em> (telegrafia precisa de perigos), <em>Metal Slug</em> (cadência de tiros e armas de sucata), <em>Mega Man X</em> (dash com física e tiros carregados)</td>
+                </tr>
+                <tr>
+                    <td><strong>Plataforma Primária</strong></td>
+                    <td>PC Desktop (Windows 10 / Windows 11 x64)</td>
+                </tr>
+                <tr>
+                    <td><strong>Modo de Jogo</strong></td>
+                    <td>Single-Player (Campanha Arcade com registro local de recordes / High Scores)</td>
+                </tr>
+                <tr>
+                    <td><strong>Perspectiva e Visual</strong></td>
+                    <td>2D Lateral (Side-Scrolling) com Parallax de 4 camadas em Pixel Art 16-bit com contornos expressivos</td></tr><tr><td><strong>Motor Gráfico / Stack</strong></td><td>Custom Engine em Python com Pygame / Pygame-CE (ou C++/Raylib, C#/MonoGame)</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- SEÇÃO 2: CONCEITO PRINCIPAL E NARRATIVA -->
+    <section>
+        <h2>2. Conceito Principal e Narrativa</h2>
+        
+        <h3>2.1 Premissa Criativa (High Concept)</h3>
+        <p>
+            No ano de 2184, a Terra foi convertida no <strong>Setor Sucata-Zero</strong>, um imenso lixão industrial automatizado e deserto. 
+            A superinteligência gestora da instalação, batizada de <strong>"A Compactadora-Mor"</strong>, sofreu uma falha fatal em seus algoritmos de classificação: 
+            ela passou a interpretar qualquer resquício de cultura, história, arte e invenção humana como "dejeto irregular de alta prioridade de descarte".
+        </p>
+        <p>
+            O jogador encarna <strong>B-09 (conhecido pelo apelido de "Scrappy")</strong>, um pequeno robô utilitário de manutenção, equipado originariamente apenas com engraxadeiras e uma chave de torque. 
+            Ao escanear por engano um disquete magnético preservado contendo registros de músicas, desenhos animados e jogos antigos, o chassi de Scrappy é tomado por uma semente de consciência. 
+            Ele recusa a ordem de reciclagem e parte em direção à Torre de Compactação para desligar a IA central. 
+            Para sobreviver às esteiras trituradoras e aos robôs de segurança corrompidos, Scrappy adapta ferramentas industriais descartadas, transformando-as em um arsenal de alta pressão e fumaça.
+        </p>
+
+        <div class="callout">
+            <div class="callout-title">Pilares Fundamentais de Game Design</div>
+            <ul>
+                <li><strong>Ação Rápida e Telegrafada:</strong> O ritmo de jogo é ininterrupto, mas todos os golpes e projéteis inimigos apresentam antecipações visuais nítidas, recompensando a maestria motora do jogador.</li>
+                <li><strong>Física Precisa e Reativa:</strong> Controles imediatos e responsivos, com pulo de altura dinâmica, corte de salto, gravidade assimétrica e dash com quadros de invulnerabilidade.</li>
+                <li><strong>Coleta e Improvisação de Sucata:</strong> Destruir autômatos libera porcas e baterias que recarregam a vida e fornecem tiros especiais temporários, incentivando aproximação constante.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- SEÇÃO 3: ESTILO, GÊNERO E PLATAFORMA ALVO -->
+    <section>
+        <h2>3. Estilo, Gênero e Plataforma Alvo</h2>
+        
+        <h3>3.1 Características do Gênero (Run and Gun)</h3>
+        <p>
+            Como legítimo representante do subgênero <em>Run and Gun</em>, o jogo funde a agilidade de um jogo de plataforma tradicional com a intensidade de um <em>Shooter</em> arcade:
+        </p>
+        <ul>
+            <li><strong>Movimento e Tiro Simultâneos:</strong> O personagem é capaz de correr, pular e deslizar enquanto mira e dispara em até 8 eixos direcionais independentes.</li>
+            <li><strong>Ondas Contínuas e Padrões Coreografados:</strong> Hordas de inimigos menores atacam em formações pré-estabelecidas, culminando em subchefes e chefes com múltiplas barras de vida e ataques em fases.</li>
+            <li><strong>Curva de Aprendizado Gradual:</strong> Desafio exigente porém justo, onde o fracasso ensina o padrão mecânico das ameaças sem gerar frustração punitiva.</li>
+        </ul>
+
+        <h3>3.2 Requisitos Técnicos de Hardware (PC Windows)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Componente</th>
+                    <th>Especificação Mínima</th>
+                    <th>Especificação Recomendada</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Sistema Operacional</strong></td>
+                    <td>Microsoft Windows 10 (64-bit) v1909 ou superior</td>
+                    <td>Microsoft Windows 10 / 11 (64-bit) atualizado</td>
+                </tr>
+                <tr>
+                    <td><strong>Processador (CPU)</strong></td>
+                    <td>Intel Core i3-4130 @ 3.4 GHz / AMD FX-4300 @ 3.8 GHz</td>
+                    <td>Intel Core i5-6400 @ 2.7 GHz / AMD Ryzen 3 1200</td>
+                </tr>
+                <tr>
+                    <td><strong>Memória RAM</strong></td>
+                    <td>4 GB DDR3</td>
+                    <td>8 GB DDR4</td>
+                </tr>
+                <tr>
+                    <td><strong>Placa Gráfica (GPU)</strong></td>
+                    <td>Intel HD Graphics 4400 / AMD Radeon Vega 3 (DirectX 11 / OpenGL 3.3)</td>
+                    <td>NVIDIA GeForce GTX 750 Ti / AMD Radeon RX 550 (2 GB VRAM)</td>
+                </tr>
+                <tr>
+                    <td><strong>Armazenamento</strong></td>
+                    <td>500 MB de espaço disponível (HDD ou SSD)</td>
+                    <td>1 GB de espaço disponível em SSD</td>
+                </tr>
+                <tr>
+                    <td><strong>Dispositivos de Entrada</strong></td>
+                    <td>Teclado 100% / TKL e Mouse</td>
+                    <td>Controle Gamepad XInput (Xbox Series/One/360)</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- SEÇÃO 4: MECÂNICAS, CONTROLES E FORMULAÇÃO FÍSICA -->
+    <div class="page-break"></div>
+    <section>
+        <h2>4. Mecânicas, Controles e Formulação Física</h2>
+
+        <h3>4.1 Mapeamento de Controles</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ação do Jogador</th>
+                    <th>Teclado (Padrão)</th>
+                    <th>Teclado (Alternativo)</th>
+                    <th>Gamepad XInput (Xbox)</th>
+                    <th>Efeito Mecânico</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Mover Esquerda / Direita</strong></td>
+                    <td><code>A</code> / <code>D</code></td>
+                    <td><code>Seta Esq</code> / <code>Seta Dir</code></td>
+                    <td>Analógico Esquerdo (Eixo X) ou D-Pad</td>
+                    <td>Aplica aceleração horizontal contínua até $v_{max}$.</td>
+                </tr>
+                <tr>
+                    <td><strong>Agachar / Mirar Baixo</strong></td>
+                    <td><code>S</code></td>
+                    <td><code>Seta Baixo</code></td>
+                    <td>Analógico Esquerdo (Eixo Y < 0)</td>
+                    <td>Reduz hitbox pela metade; permite disparo rasteiro.</td>
+                </tr>
+                <tr>
+                    <td><strong>Mirar para Cima</strong></td>
+                    <td><code>W</code></td>
+                    <td><code>Seta Cima</code></td>
+                    <td>Analógico Esquerdo (Eixo Y > 0)</td>
+                    <td>Aponta o cano da arma em 90° para o alto.</td>
+                </tr>
+                <tr>
+                    <td><strong>Pular / Pulo Duplo</strong></td>
+                    <td><code>Espaço</code></td>
+                    <td><code>Z</code> ou <code>K</code></td>
+                    <td><code>Botão A</code></td>
+                    <td>Impulso vertical inicial; segundo impulso no ar (Jetpack).</td>
+                </tr>
+                <tr>
+                    <td><strong>Atirar (Disparo)</strong></td>
+                    <td><code>J</code> ou <code>Botão Esq. Mouse</code></td>
+                    <td><code>X</code></td>
+                    <td><code>Botão X</code> ou <code>Gatilho RT</code></td>
+                    <td>Dispara projéteis sucessivos na direção apontada.</td>
+                </tr>
+                <tr>
+                    <td><strong>Dash (Esquiva Rápida)</strong></td>
+                    <td><code>K</code> ou <code>Shift Esquerdo</code></td>
+                    <td><code>C</code></td>
+                    <td><code>Botão B</code> ou <code>Botão RB</code></td>
+                    <td>Impulso horizontal rápido com 12 frames de invulnerabilidade.</td>
+                </tr>
+                <tr>
+                    <td><strong>Travar Mira (Lock Aim)</strong></td>
+                    <td><code>Shift Direito</code> ou <code>Ctrl</code></td>
+                    <td><code>L</code></td>
+                    <td><code>Gatilho LT</code></td>
+                    <td>Fixa a posição dos pés no solo enquanto mira em 8 eixos.</td>
+                </tr>
+                <tr>
+                    <td><strong>Trocar Arma</strong></td>
+                    <td><code>Q</code> ou <code>E</code></td>
+                    <td><code>U</code> / <code>I</code></td>
+                    <td><code>Botão Y</code> ou <code>Botão LB</code></td>
+                    <td>Alterna entre Rebitadeira Padrão e Disparo Triplo.</td>
+                </tr>
+                <tr>
+                    <td><strong>Menu de Pausa</strong></td>
+                    <td><code>ESC</code></td>
+                    <td><code>P</code></td>
+                    <td><code>Botão Start / Menu</code></td>
+                    <td>Interrompe o Fixed Timestep e exibe menu de opções.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>4.2 Fórmulas Matemáticas e Modelo de Física</h3>
+        <p>
+            O motor de física opera com <strong>Integração de Euler Semi-Implícita</strong> em uma taxa fixa de atualização de simulação (<em>Fixed Timestep</em>) de $\Delta t = \frac{1}{60} \text{ s} \approx 0{,}01667 \text{ s}$. 
+            Essa abordagem assegura que o comportamento físico seja rigorosamente idêntico independentemente da taxa de atualização do monitor do usuário (60Hz, 144Hz ou 240Hz).
+        </p>
+
+        <div class="formula-box">
+            <h4>A. Equações de Movimento Horizontal</h4>
+            <p>Seja $u_x \in \{-1, 0, 1\}$ o comando direcional do jogador:</p>
+            <p><strong>1. Em Aceleração Ativa ($u_x \neq 0$):</strong></p>
+            $$a_x = u_x \cdot a_{run}, \quad \text{onde } a_{run} = 1200 \text{ px/s}^2$$
+            $$v_x(t + \Delta t) = \max\left(-v_{max}, \min\left(v_{max}, \ v_x(t) + a_x \cdot \Delta t\right)\right), \quad \text{onde } v_{max} = 240 \text{ px/s}$$
+            
+            <p><strong>2. Em Desaceleração / Frenagem por Atrito ($u_x = 0$):</strong></p>
+            $$v_x(t + \Delta t) = \text{sgn}(v_x(t)) \cdot \max\left(0, \ |v_x(t)| - \mu \cdot \Delta t\right)$$
+            $$\mu = \begin{cases} \mu_{ground} = 1600 \text{ px/s}^2, & \text{se em contato com o solo} \\ \mu_{air} = 400 \text{ px/s}^2, & \text{se no ar (preserva inércia para saltos longos)} \end{cases}$$
+        </div>
+
+        <div class="formula-box">
+            <h4>B. Pulo Dinâmico, Corte de Salto e Gravidade Assimétrica</h4>
+            <p>
+                Para obter um salto responsivo e intuitivo, os parâmetros físicos são deduzidos a partir da altura máxima desejada ($h = 96 \text{ px}$, correspondente a 3 tiles de 32px) e do tempo até o ápice ($t_{apex} = 0{,}32 \text{ s}$):
+            </p>
+            $$g_{base} = \frac{2 \cdot h}{t_{apex}^2} = \frac{2 \cdot 96}{(0{,}32)^2} = \frac{192}{0{,}1024} = 1875 \text{ px/s}^2$$
+            $$v_{jump} = - \frac{2 \cdot h}{t_{apex}} = - \frac{192}{0{,}32} = -600 \text{ px/s} \quad \text{(sentido para cima no sistema 2D)}$$
+
+            <p><strong>Corte de Pulo (Variable Jump Height):</strong></p>
+            <p>Se o jogador soltar a tecla de pulo antes do ápice ($v_y < 0$):</p>
+            $$v_y \leftarrow v_y \cdot \alpha_{cut}, \quad \text{onde } \alpha_{cut} = 0{,}40$$
+
+            <p><strong>Gravidade Efetiva Assimétrica (Fall Multiplier):</strong></p>
+            $$g_{eff} = \begin{cases} 
+                g_{base} \cdot 1{,}80 = 3375 \text{ px/s}^2, & \text{se } v_y > 0 \text{ (fase de queda - evita efeito flutuante)} \\ 
+                g_{base} \cdot 1{,}50 = 2812{,}5 \text{ px/s}^2, & \text{se } v_y < 0 \text{ e a tecla de pulo foi liberada prematuramente} \\ 
+                g_{base} = 1875 \text{ px/s}^2, & \text{se } v_y < 0 \text{ e a tecla de pulo permanece sustentada}
+            \end{cases}$$
+            
+            <p><strong>Velocidade Máxima de Queda:</strong> $v_y(t + \Delta t) = \min(v_y(t) + g_{eff} \cdot \Delta t, \ 750 \text{ px/s})$.</p>
+            <p><strong>Tolerâncias de Controle:</strong> Suporte a <em>Coyote Time</em> de $0{,}10 \text{ s}$ e <em>Jump Buffering</em> de $0{,}12 \text{ s}$.</p>
+        </div>
+
+        <div class="formula-box">
+            <h4>C. Cinemática do Dash e Balística com Recuo</h4>
+            <p><strong>Dash:</strong> Velocidade de impulso $v_{dash} = 650 \text{ px/s}$, gravidade $v_y = 0$, duração $\tau_{dash} = 0{,}22 \text{ s}$, percorrendo $d = 143 \text{ px}$ com 12 frames de invulnerabilidade e cooldown de $0{,}60 \text{ s}$.</p>
+            <p><strong>Projétil:</strong> $\vec{P}(t + \Delta t) = \vec{P}(t) + (800 \cdot \hat{d}_{aim}) \cdot \Delta t$.</p>
+            <p><strong>Recuo no Atirador (Knockback por Conservação de Momento):</strong></p>
+            $$v_x^{player} \leftarrow v_x^{player} - \hat{d}_{aim\_x} \cdot \left( \frac{m_{bullet} \cdot v_{bullet}}{m_{player}} \right) = v_x^{player} - \hat{d}_{aim\_x} \cdot \left( \frac{0{,}15 \cdot 800}{35} \right) \approx v_x^{player} - 3{,}43 \cdot \hat{d}_{aim\_x} \text{ px/s}$$
+        </div>
+
+        <h3>4.3 Detecção e Resolução de Colisões (AABB & MTV)</h3>
+        <p>
+            Todas as caixas de colisão são alinhadas aos eixos cartesianos (AABB). Para duas caixas $A$ e $B$:
+        </p>
+        $$\text{Interseção}(A, B) \iff (A.x_{min} < B.x_{max}) \land (A.x_{max} > B.x_{min}) \land (A.y_{min} < B.y_{max}) \land (A.y_{max} > B.y_{min})$$
+        <p>
+            A resolução calcula a menor penetração nos eixos $X$ e $Y$ (Vetor de Translação Mínima - MTV):
+        </p>
+        $$\text{pen}_x = \min(A.x_{max} - B.x_{min}, \ B.x_{max} - A.x_{min}), \quad \text{pen}_y = \min(A.y_{max} - B.y_{min}, \ B.y_{max} - A.y_{min})$$
+        <p>
+            Se $\text{pen}_x < \text{pen}_y$, aplica-se correção horizontal e zera-se $v_x$; caso contrário, corrige-se verticalmente, zera-se $v_y$ e define-se o estado de solo (<code>is_grounded = true</code>).
+        </p>
+        <h4>D. Detecção Híbrida: Fase Ampla (AABB) e Fase Estreita (Máscaras de Bits / Pixel-Perfect)</h4>
+        <p>
+            Para conciliar taxa de 60 FPS estáveis com precisão de impacto nos projéteis, adota-se detecção em dois estágios: a <strong>Fase Ampla (Broad-phase)</strong> filtra caixas AABB de terreno e atores; havendo interseção preliminar entre projétil e inimigos de perfil complexo (como a hélice do Drone ou a chama do Soldador), a <strong>Fase Estreita (Narrow-phase)</strong> aplica Máscaras de Bits (<em>Bitmasks</em> via <code>pygame.mask.from_surface</code>), calculando o offset <code>(pos_inimigo - pos_proj)</code> e validando a colisão pixel a pixel (<code>mask1.overlap(mask2, offset)</code>).
+        </p>
+    </section>
+
+    <!-- SEÇÃO 5: ASSETS AUDIOVISUAIS E CENÁRIO INICIAL -->
+    <div class="page-break"></div>
+    <section>
+        <h2>5. Assets Audiovisuais e Cenário Inicial</h2>
+
+        <h3>5.1 Especificação de Sprites do Personagem Principal (Scrappy - B-09)</h3>
+        <p>Canvas de desenho: $32 \times 32$ pixels | Hitbox de colisão: $20 \times 28$ pixels.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Animação (Sprite Tag)</th>
+                    <th>Frames</th>
+                    <th>FPS</th>
+                    <th>Descrição Visual e Movimento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>scrappy_idle</code></td>
+                    <td>4</td>
+                    <td>6</td>
+                    <td>Oscilação sutil do chassi metálico; válvula no topo da cabeça solta pequenos círculos de vapor.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_run</code></td>
+                    <td>8</td>
+                    <td>12</td>
+                    <td>Ciclo de corrida com pernas mecânicas alternadas, corpo inclinado para frente em 15°.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_jump_rise</code></td>
+                    <td>3</td>
+                    <td>12</td>
+                    <td>Chassi estica-se verticalmente (squash & stretch); pequenas faíscas nas solas dos pés.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_jump_fall</code></td>
+                    <td>2</td>
+                    <td>8</td>
+                    <td>Chassi achata levemente; olhos arregalados acompanham a descida.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_double_jump</code></td>
+                    <td>4</td>
+                    <td>14</td>
+                    <td>Extintor de CO₂ aciona nas costas soltando jato de fumaça branca pressurizada para baixo.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_shoot_straight</code></td>
+                    <td>4</td>
+                    <td>16</td>
+                    <td>Braço-rebitadeira estendido para frente; muzzle flash de plasma azul e ejeção de cápsulas.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_shoot_diagonal</code></td>
+                    <td>4</td>
+                    <td>16</td>
+                    <td>Arma apontada em ângulo de 45°; corpo se adapta ao vetor de tiro.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_shoot_up</code></td>
+                    <td>4</td>
+                    <td>16</td>
+                    <td>Cabeça e braço levantados a 90° mirando verticalmente para cima.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_crouch_shoot</code></td>
+                    <td>3</td>
+                    <td>12</td>
+                    <td>Scrappy encolhido no solo (hitbox $20 \times 14$ px), disparando a 2 pixels do piso.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_dash</code></td>
+                    <td>4</td>
+                    <td>18</td>
+                    <td>O robô se projeta horizontalmente com linhas de velocidade e rastro translúcido de afterimages.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_hurt</code></td>
+                    <td>3</td>
+                    <td>12</td>
+                    <td>Piscar rápido branco/vermelho por 1 segundo; parafusos soltam-se com expressão de alarme.</td>
+                </tr>
+                <tr>
+                    <td><code>scrappy_death</code></td>
+                    <td>8</td>
+                    <td>10</td>
+                    <td>Desmontagem cômica: cabeça salta em mola enquanto engrenagens e parafusos voam pela tela.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>5.2 Sprites de Inimigos e Itens</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Entidade</th>
+                    <th>Tipo / Papel</th>
+                    <th>Resolução</th>
+                    <th>Comportamento e Estados de Animação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Drone Parafuso</strong></td>
+                    <td>Inimigo Aéreo</td>
+                    <td>$32 \times 32$ px</td>
+                    <td>Patrulha senoidal horizontal. Para ao avistar o jogador, pisca o olho vermelho e dispara esfera elétrica amarela. (<code>hover</code>, <code>charge</code>, <code>shoot</code>, <code>explode</code>).</td>
+                </tr>
+                <tr>
+                    <td><strong>Prensa Bípede</strong></td>
+                    <td>Inimigo Terrestre Pesado</td>
+                    <td>$48 \times 48$ px</td>
+                    <td>Tanque blindado frontalmente. Avança lentamente e salta gerando impacto com tremor de tela e ondas de choque terrestres. (<code>walk</code>, <code>slam_charge</code>, <code>impact</code>, <code>stunned</code>).</td>
+                </tr>
+                <tr>
+                    <td><strong>Robô Soldador</strong></td>
+                    <td>Inimigo Terrestre Ágil</td>
+                    <td>$32 \times 48$ px</td>
+                    <td>Corre em direção ao jogador em plataformas elevadas e aciona maçarico contínuo de 40px por 1.5s. (<code>run</code>, <code>flame_torch</code>, <code>death</code>).</td>
+                </tr>
+                <tr>
+                    <td><strong>Óleo Sintético</strong></td>
+                    <td>Item / Coletável</td>
+                    <td>$16 \times 16$ px</td>
+                    <td>Frasco de vidro vintage com líquido dourado pulsante (4 frames). Recupera 1 ponto de HP.</td>
+                </tr>
+                <tr>
+                    <td><strong>Parafuso Dourado</strong></td>
+                    <td>Item / Coletável</td>
+                    <td>$16 \times 16$ px</td>
+                    <td>Parafuso sextavado brilhante girando em 3D simulado (6 frames). Concede +100 pontos.</td>
+                </tr>
+                <tr>
+                    <td><strong>Bateria de Plasma</strong></td>
+                    <td>Power-Up</td>
+                    <td>$16 \times 16$ px</td>
+                    <td>Célula de energia azul com arcos elétricos (4 frames). Concede Tiro Triplo (Spread) temporário.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>5.3 Cenário Inicial: "Setor 01 – As Esteiras Infernais"</h3>
+        <p>
+            O nível introdutório se desenvolve na usina de triagem e britagem. O cenário utiliza composição em <strong>Parallax Scrolling com 4 Camadas</strong>:
+        </p>
+        <ul>
+            <li><strong>Camada 0 (Fundo Distante - Fator $0{,}10\times$):</strong> Céu crepuscular avermelhado por fumaça pesada, silhuetas de chaminés industriais e a Torre da Compactadora no horizonte.</li>
+            <li><strong>Camada 1 (Fundo Médio - Fator $0{,}30\times$):</strong> Tubulações cilíndricas gigantescas transportando lava metálica e esteiras aéreas com braços robóticos.</li>
+            <li><strong>Camada 2 (Fundo Próximo - Fator $0{,}60\times$):</strong> Vigas de aço enferrujado com rebites destacados, painéis elétricos com faíscas e monitores CRT de advertência.</li>
+            <li><strong>Camada 3 (Plataformas / Playfield - Fator $1{,}00\times$):</strong> Chão colidível de aço antiderrapante, caixas de sucata destrutíveis e esteiras industriais motorizadas que impulsionam o jogador ($\pm 60 \text{ px/s}$).</li>
+        </ul>
+
+        <h3>5.4 Design de Áudio (SFX e Música)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Evento Sonoro</th>
+                    <th>Perfil Acústico e Síntese</th>
+                    <th>Ferramenta</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>sfx_laser_pew</code></td>
+                    <td>Onda quadrada modulada em frequência (800 Hz $\to$ 150 Hz em 60 ms). Som agudo de disparo retrô.</td>
+                    <td>Bfxr / Chiptone</td>
+                </tr>
+                <tr>
+                    <td><code>sfx_jump_spring</code></td>
+                    <td>Onda senoidal com pitch bend ascendente (200 Hz $\to$ 520 Hz) com ressonância de mola mecânica.</td>
+                    <td>Bfxr</td>
+                </tr>
+                <tr>
+                    <td><code>sfx_jetpack_burst</code></td>
+                    <td>Ruído branco filtrado com passa-faixa (bandpass) simulando vazamento súbito de gás sob pressão.</td>
+                    <td>Audacity</td>
+                </tr>
+                <tr>
+                    <td><code>sfx_dash_whoosh</code></td>
+                    <td>Ruído rosa com ataque ultrarrápido (5 ms) e decaimento estéreo com efeito Doppler de deslocamento.</td>
+                    <td>Audacity</td>
+                </tr>
+                <tr>
+                    <td><code>sfx_enemy_hit</code></td>
+                    <td>Impacto metálico percussivo de 1200 Hz com envelope de decaimento rápido (40 ms).</td>
+                    <td>Bfxr</td>
+                </tr>
+                <tr>
+                    <td><code>sfx_explosion_metal</code></td>
+                    <td>Ruído grave (sub-bass 80 Hz) associado a estalos metálicos de engrenagens e placas quebrando.</td>
+                    <td>Audacity</td>
+                </tr>
+                <tr>
+                    <td><code>sfx_item_pickup</code></td>
+                    <td>Arpejo duplo cristalino em onda triangular (Dó6 $\to$ Sol6) em escala ascendente.</td>
+                    <td>Chiptone</td>
+                </tr>
+                <tr>
+                    <td><strong>Trilha Sonora (BGM)</strong></td>
+                    <td><strong>"Scrapyard Swing & Solder":</strong> Electro-Swing Industrial a 138 BPM. Combinação de baixo sintetizado pulsante estilo Mega Drive com bateria sincopada e sopros cômicos estilo Big Band.</td>
+                    <td>FL Studio / Bosca Ceoil</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- SEÇÃO 6: FERRAMENTAS DE SUPORTE -->
+    <section>
+        <h2>6. Ferramentas de Suporte ao Desenvolvimento</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Ferramenta Selecionada</th>
+                    <th>Finalidade Específica e Recursos Chave</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Arte Visual e Animação</strong></td>
+                    <td><strong>Aseprite</strong> (ou LibreSprite)</td>
+                    <td>Criação de sprites, folhas de sprites (*spritesheets*), paletas indexadas e animação quadro a quadro. Suporte a tags nomeadas (<code>run</code>, <code>jump</code>, <code>shoot</code>) e exportação em PNG + JSON de metadados.</td>
+                </tr>
+                <tr>
+                    <td><strong>Level Design / Cenários</strong></td>
+                    <td><strong>Tiled Map Editor</strong></td>
+                    <td>Montagem dos mapas por camadas ortogonais de tilesets 32x32 px. Definição de propriedades personalizadas de colisão (<code>solid = true</code>, <code>hazard = true</code>) e pontos de spawn exportados em JSON.</td>
+                </tr>
+                <tr>
+                    <td><strong>Síntese de Efeitos Sonoros</strong></td>
+                    <td><strong>Bfxr / Chiptone</strong></td>
+                    <td>Geração procedural de SFX estilo 8-bit/16-bit com controle granular sobre formas de onda (senoidal, quadrada, ruído), envelopes ADSR e modulações de frequência. Exportação em WAV sem perdas.</td>
+                </tr>
+                <tr>
+                    <td><strong>Edição e Mixagem de Som</strong></td>
+                    <td><strong>Audacity</strong></td>
+                    <td>Edição multipista, equalização para corte de frequências indesejadas, normalização de volume (LUFS) e exportação da música e áudios em formato de alta compressão e baixa sobrecarga <strong>OGG Vorbis</strong>.</td>
+                </tr>
+                <tr>
+                    <td><strong>Composição Musical</strong></td>
+                    <td><strong>Bosca Ceoil / FL Studio</strong></td>
+                    <td>Arranjo das faixas musicais com canais de sintetizadores chiptune e percussões industriais.</td>
+                </tr>
+                <tr>
+                    <td><strong>IDE e Versionamento</strong></td>
+                    <td><strong>VS Code & Git</strong></td>
+                    <td>Ambiente de codificação com depuração integrada e controle de versões distribuído no GitHub.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- SEÇÃO 7: REQUISITOS DO SISTEMA -->
+    <div class="page-break"></div>
+    <section>
+        <h2>7. Requisitos Funcionais e Não Funcionais</h2>
+
+        <h3>7.1 Requisitos Funcionais (RF)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;">ID</th>
+                    <th style="width: 75%;">Descrição do Requisito Funcional</th>
+                    <th style="width: 15%;">Prioridade</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>RF01</strong></td>
+                    <td>O sistema deve calcular a movimentação horizontal do personagem aplicando aceleração por comando de entrada e atrito para desaceleração suave.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF02</strong></td>
+                    <td>O sistema deve permitir pulo dinâmico com altura dependente da sustentação da tecla, suporte a pulo duplo no ar e tolerâncias (coyote time e jump buffer).</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF03</strong></td>
+                    <td>O sistema deve executar o dash horizontal com anulação transitória de gravidade e 12 frames de invulnerabilidade (i-frames) a danos de inimigos.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF04</strong></td>
+                    <td>O sistema deve permitir disparos contínuos em 8 direções no solo, durante o pulo e agachado.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF05</strong></td>
+                    <td>O sistema deve gerenciar a alternância entre armas coletadas (Rebitadeira Padrão e Disparo Triplo) através de comando dedicado.</td>
+                    <td><span class="badge badge-should">Should Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF06</strong></td>
+                    <td>O sistema deve controlar a integridade (HP) de Scrappy (3 pontos de vida), ativando efeito de piscar e invulnerabilidade temporária pós-dano.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF07</strong></td>
+                    <td>O sistema deve controlar as máquinas de estado finito (FSM) dos inimigos (Drone Parafuso, Prensa Bípede e Robô Soldador) com patrulha e ataque.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF08</strong></td>
+                    <td>O sistema deve detectar impactos de projéteis em inimigos, descontando vida e instanciando efeitos de faísca e áudio de impacto.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF09</strong></td>
+                    <td>O sistema deve instanciar itens coletáveis (Óleo, Parafusos e Baterias) no mapa e aplicar efeitos imediatos ao tocar o jogador.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF10</strong></td>
+                    <td>O sistema deve simular esteiras industriais ativas que adicionam vetor de velocidade contínuo aos atores que pisam sobre elas.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF11</strong></td>
+                    <td>O sistema deve controlar uma câmera 2D com interpolação suave (Lerp), zona morta central e deslocamento antecipado (Look-Ahead).</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF12</strong></td>
+                    <td>O sistema deve renderizar interface HUD permanente na tela exibindo vida (HP), ícone da arma selecionada, munição e pontuação.</td>
+                    <td><span class="badge badge-must">Must Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF13</strong></td>
+                    <td>O sistema deve acumular pontuação por abate e coleta de parafusos, exibindo telas finais de Game Over ou Vitória.</td>
+                    <td><span class="badge badge-should">Should Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF14</strong></td>
+                    <td>O sistema deve congelar o loop de simulação ao receber comando de Pause e exibir menu funcional na tela.</td>
+                    <td><span class="badge badge-should">Should Have</span></td>
+                </tr>
+                <tr>
+                    <td><strong>RF15</strong></td>
+                    <td>O sistema deve tocar música de fundo em loop ininterrupto e efeitos sonoros com controles independentes de volume master.</td>
+                    <td><span class="badge badge-should">Should Have</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>7.2 Requisitos Não Funcionais (RNF)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;">ID</th>
+                    <th style="width: 25%;">Categoria</th>
+                    <th style="width: 65%;">Critério e Métrica de Aceitação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>RNF01</strong></td>
+                    <td><strong>Desempenho</strong></td>
+                    <td>A simulação física e renderização gráfica devem sustentar taxa estável de <strong>60 quadros por segundo (FPS)</strong> sem quedas bruscas em hardware mínimo.</td>
+                </tr>
+                <tr>
+                    <td><strong>RNF02</strong></td>
+                    <td><strong>Latência de Entrada</strong></td>
+                    <td>O atraso de resposta entre a ativação do periférico (teclado/gamepad) e a alteração de estado em tela deve ser estritamente <strong>menor que 16,6 milissegundos</strong> (1 frame).</td>
+                </tr>
+                <tr>
+                    <td><strong>RNF03</strong></td>
+                    <td><strong>Consumo de Memória</strong></td>
+                    <td>O consumo total de memória RAM do executável não deve ultrapassar <strong>250 MB</strong> durante a execução ativa da fase com todos os assets carregados.</td>
+                </tr>
+                <tr>
+                    <td><strong>RNF04</strong></td>
+                    <td><strong>Compatibilidade</strong></td>
+                    <td>O jogo deve executar nativamente em sistemas Microsoft Windows 10 e Windows 11 (arquitetura x64) com suporte a DirectX 11 ou OpenGL 3.3+.</td>
+                </tr>
+                <tr>
+                    <td><strong>RNF05</strong></td>
+                    <td><strong>Desacoplamento de Código</strong></td>
+                    <td>O projeto deve adotar arquitetura modular em pacotes isolados por interfaces, garantindo que o módulo de física opere sem conhecimento direto de OpenGL ou DirectX.</td>
+                </tr>
+                <tr>
+                    <td><strong>RNF06</strong></td>
+                    <td><strong>Tempo de Carregamento</strong></td>
+                    <td>O carregamento inicial e a transição entre telas de menu e fase devem ser concluídos em tempo inferior a <strong>2,5 segundos</strong>.</td>
+                </tr>
+                <tr>
+                    <td><strong>RNF07</strong></td>
+                    <td><strong>Padronização de Formatos</strong></td>
+                    <td>Todos os recursos de mídia devem utilizar formatos abertos e eficientes: imagens em PNG-32 com canal alfa, sons em OGG Vorbis/WAV e mapas em JSON.</td>
+                </tr>
+                <tr>
+                    <td><strong>RNF08</strong></td>
+                    <td><strong>Tratamento de Exceções</strong></td>
+                    <td>Perda de foco da janela deve acionar pausa automática; desconexão abrupta do controle deve manter o jogo estável sem travamento de processo.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- SEÇÃO 8: DIAGRAMA DE ESTRUTURA DO PROJETO EM MÓDULOS -->
+    <div class="page-break"></div>
+    <section>
+        <h2>8. Diagrama de Estrutura do Projeto em Módulos (Pacotes)</h2>
+        <p>
+            O diagrama abaixo representa a organização do software em pacotes lógicos e a direção dos fluxos de dados, garantindo separação clara de responsabilidades:
+        </p>
+        <div class="diagram-container">
+            <div id="diagram0"></div>
+            <div class="diagram-caption">Figura 1: Diagrama de Arquitetura em Módulos e Fluxo do GameLoop.</div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO 9: DIAGRAMA DE DEPENDÊNCIAS ESTRUTURAIS PARA ENTIDADES (CLASSES UML) -->
+    <div class="page-break"></div>
+    <section>
+        <h2>9. Diagrama de Dependências Estruturais para Entidades (Classes UML)</h2>
+        <p>
+            O diagrama de classes a seguir detalha a estrutura orientada a objetos das entidades do jogo, destacando o polimorfismo via interfaces, a composição de sistemas físicos/armas e o relacionamento entre os atores:
+        </p>
+        <div class="diagram-container">
+            <div id="diagram1"></div>
+            <div class="diagram-caption">Figura 2: Diagrama de Classes UML de Entidades e Sistemas.</div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO 10: CONCLUSÃO -->
+    <section>
+        <h2>10. Conclusão e Considerações Finais</h2>
+        <p>
+            O presente <strong>Game Design Document (GDD)</strong> formaliza todos os componentes conceituais, matemáticos, audiovisuais e arquiteturais necessários para o desenvolvimento de <em>"Rust & Byte: O Despertar da Sucata"</em>, cumprindo integralmente as exigências do <strong>Trabalho 1</strong> da disciplina de <strong>Tópicos Avançados em Computação (TAC)</strong>, sob a orientação do <strong>Prof. Vanderson</strong>.
+        </p>
+        <p>
+            A definição rigorosa da simulação física em Fixed Timestep de 60Hz com gravidade assimétrica aliada à clareza do modelo de classes e diagramas de pacotes assegura que a implementação computacional do jogo transcorra de maneira modular, com alto desempenho e fidelidade ao gênero <em>Run and Gun</em> clássico.
+        </p>
+    </section>
+
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+
+    const diag0 = `graph TD
+    subgraph Client_App ["Aplicação Principal / EntryPoint"]
+        Main["Main / GameApplication"]
+    end
+
+    subgraph Core_Engine ["Módulo Core / Engine"]
+        GameLoop["GameLoop (Fixed Timestep 60Hz)"]
+        TimeStep["TimeStep / Clock"]
+        EventBus["EventBus / SignalManager"]
+    end
+
+    subgraph Input_Module ["Módulo de Entrada (Input)"]
+        InputManager["InputManager"]
+        IInputDevice["Interface IInputDevice"]
+        KeyboardDevice["KeyboardDevice"]
+        GamepadDevice["GamepadXInputDevice"]
+    end
+
+    subgraph Physics_Module ["Módulo de Física (Physics)"]
+        PhysicsWorld["PhysicsWorld2D"]
+        CollisionSystem["CollisionSystem (AABB / MTV)"]
+        RigidBody["RigidBody2D"]
+        Collider["Collider2D (Box / Trigger)"]
+    end
+
+    subgraph Entities_Module ["Módulo de Entidades (Entities)"]
+        EntityManager["EntityManager"]
+        Entity["Entity (Base)"]
+        Actor["Actor (Pawn)"]
+        Player["Player (Scrappy)"]
+        Enemy["Enemy (Base)"]
+        ScrewDrone["ScrewDrone"]
+        HydraulicStomper["HydraulicStomper"]
+        WelderBot["WelderBot"]
+        Projectile["Projectile"]
+        ItemPickup["ItemPickup"]
+    end
+
+    subgraph Graphics_Module ["Módulo Gráfico e Renderização"]
+        Renderer2D["Renderer2D"]
+        Camera2D["Camera2D (SmoothFollow / Shake)"]
+        SpriteSheet["SpriteSheet / TextureAtlas"]
+        AnimationController["AnimationController (FSM)"]
+        ParallaxScroller["ParallaxScroller"]
+    end
+
+    subgraph Audio_Module ["Módulo de Áudio"]
+        AudioManager["AudioManager"]
+        SoundBank["SoundBank (SFX WAV/OGG)"]
+        MusicStreamer["MusicStreamer (BGM Stream)"]
+    end
+
+    subgraph World_Module ["Módulo de Mundo e Fases"]
+        SceneManager["SceneManager"]
+        Level["Level / Sector01"]
+        Tilemap["Tilemap2D (Tiled JSON Loader)"]
+    end
+
+    subgraph UI_Module ["Módulo de Interface (UI)"]
+        HUD["HUDOverlay (HP, Ammo, Score)"]
+        MenuSystem["MenuSystem (Pause, GameOver)"]
+    end
+
+    Main --> GameLoop
+    GameLoop --> InputManager
+    GameLoop --> PhysicsWorld
+    GameLoop --> EntityManager
+    GameLoop --> SceneManager
+    GameLoop --> Renderer2D
+    GameLoop --> AudioManager
+
+    InputManager --> IInputDevice
+    KeyboardDevice -->|implementa| IInputDevice
+    GamepadDevice -->|implementa| IInputDevice
+
+    PhysicsWorld --> CollisionSystem
+    PhysicsWorld --> RigidBody
+    RigidBody --> Collider
+
+    EntityManager --> Entity
+    Actor -->|herda| Entity
+    Player -->|herda| Actor
+    Enemy -->|herda| Actor
+    ScrewDrone -->|herda| Enemy
+    HydraulicStomper -->|herda| Enemy
+    WelderBot -->|herda| Enemy
+    Projectile -->|herda| Entity
+    ItemPickup -->|herda| Entity
+
+    Player -.-> RigidBody
+    Player -.-> InputManager
+    Actor --> AnimationController
+    AnimationController --> SpriteSheet
+
+    SceneManager --> Level
+    Level --> Tilemap
+    Tilemap --> CollisionSystem
+    Level --> ParallaxScroller
+
+    Renderer2D --> Camera2D
+    Renderer2D --> ParallaxScroller
+    Renderer2D --> HUD
+    Renderer2D --> MenuSystem
+
+    EventBus -.-> AudioManager
+    EventBus -.-> HUD`;
+
+    const diag1 = `classDiagram
+    class IUpdatable {
+        <<interface>>
+        +update(dt: float) void
+    }
+
+    class IDrawable {
+        <<interface>>
+        +draw(renderer: Renderer2D) void
+    }
+
+    class ICollidable {
+        <<interface>>
+        +getBounds() AABB
+        +onCollision(other: ICollidable, mtv: Vector2) void
+    }
+
+    class IDamageable {
+        <<interface>>
+        +takeDamage(amount: int, knockbackDir: Vector2) void
+        +getHealth() int
+        +isDead() bool
+    }
+
+    class CharacterState {
+        <<enumeration>>
+        IDLE
+        RUNNING
+        JUMPING
+        FALLING
+        DASHING
+        CROUCHING
+        HURT
+        DEAD
+    }
+
+    class WeaponType {
+        <<enumeration>>
+        PLASMA_RIVETER_DEFAULT
+        SPREAD_SHOT_TRIPLE
+        HEAVY_BOLT_CANNON
+    }
+
+    class Vector2 {
+        +x: float
+        +y: float
+        +normalize() Vector2
+        +length() float
+    }
+
+    class AABB {
+        +min: Vector2
+        +max: Vector2
+        +intersects(other: AABB) bool
+        +calculateMTV(other: AABB) Vector2
+    }
+
+    class RigidBody2D {
+        +velocity: Vector2
+        +acceleration: Vector2
+        +mass: float
+        +isGrounded: bool
+        +gravityScale: float
+        +applyForce(force: Vector2) void
+        +applyImpulse(impulse: Vector2) void
+        +integrate(dt: float) void
+    }
+
+    class WeaponSystem {
+        +currentWeapon: WeaponType
+        +fireCooldownTimer: float
+        +ammoCount: int
+        +fire(origin: Vector2, aimAngle: float) Projectile
+        +switchWeapon(newWeapon: WeaponType) void
+    }
+
+    class Entity {
+        <<abstract>>
+        #id: int
+        #position: Vector2
+        #isActive: bool
+        +init() void
+        +update(dt: float) void
+        +draw(renderer: Renderer2D) void
+        +getPosition() Vector2
+        +destroy() void
+    }
+
+    class Actor {
+        <<abstract>>
+        #rigidBody: RigidBody2D
+        #currentState: CharacterState
+        #facingDirection: int
+        #maxHealth: int
+        #currentHealth: int
+        #invulnerabilityTimer: float
+        +changeState(newState: CharacterState) void
+        +takeDamage(amount: int, knockbackDir: Vector2) void
+    }
+
+    class Player {
+        -weaponSystem: WeaponSystem
+        -coyoteTimer: float
+        -jumpBufferTimer: float
+        -dashCooldownTimer: float
+        -isDashing: bool
+        -canDoubleJump: bool
+        -score: int
+        -collectedScraps: int
+        +handleInput(input: InputManager) void
+        +jump() void
+        +cutJump() void
+        +performDash() void
+        +shoot() void
+        +addScore(points: int) void
+        +collectItem(item: ItemPickup) void
+    }
+
+    class Enemy {
+        <<abstract>>
+        #scoreValue: int
+        #patrolSpeed: float
+        #detectionRange: float
+        #attackCooldown: float
+        +updateAI(target: Player, dt: float) void
+        +attack() void
+    }
+
+    class ScrewDrone {
+        -verticalOscillationSpeed: float
+        -oscillationAmplitude: float
+        -flightHeight: float
+        +updateAI(target: Player, dt: float) void
+        +attack() void
+    }
+
+    class HydraulicStomper {
+        -isShieldActive: bool
+        -stompChargeTimer: float
+        +updateAI(target: Player, dt: float) void
+        +attack() void
+        +generateShockwave() void
+    }
+
+    class WelderBot {
+        -torchActive: bool
+        -torchDuration: float
+        +updateAI(target: Player, dt: float) void
+        +attack() void
+    }
+
+    class Projectile {
+        -speed: float
+        -damage: int
+        -direction: Vector2
+        -lifeTimer: float
+        -ownerTag: string
+        +onCollision(other: ICollidable, mtv: Vector2) void
+    }
+
+    class ItemPickup {
+        -itemType: string
+        -value: int
+        +onCollision(other: ICollidable, mtv: Vector2) void
+        +applyEffect(player: Player) void
+    }
+
+    Entity ..|> IUpdatable
+    Entity ..|> IDrawable
+    Actor ..|> ICollidable
+    Actor ..|> IDamageable
+    Projectile ..|> ICollidable
+    ItemPickup ..|> ICollidable
+
+    Entity <|-- Actor
+    Entity <|-- Projectile
+    Entity <|-- ItemPickup
+    Actor <|-- Player
+    Actor <|-- Enemy
+    Enemy <|-- ScrewDrone
+    Enemy <|-- HydraulicStomper
+    Enemy <|-- WelderBot
+
+    Actor *-- RigidBody2D
+    Actor *-- CharacterState
+    Player *-- WeaponSystem
+    WeaponSystem *-- WeaponType
+    RigidBody2D *-- Vector2
+    Player ..> Projectile : instantiates
+    Enemy ..> Projectile : instantiates`;
+
+    try {
+        const { svg: svg0 } = await mermaid.render('mermaid_svg_0', diag0);
+        document.getElementById('diagram0').innerHTML = svg0;
+        console.log("DIAG0 COMPLETE, len: " + svg0.length);
+    } catch(e) {
+        console.error("DIAG0 FAIL:", e);
+    }
+
+    try {
+        const { svg: svg1 } = await mermaid.render('mermaid_svg_1', diag1);
+        document.getElementById('diagram1').innerHTML = svg1;
+        console.log("DIAG1 COMPLETE, len: " + svg1.length);
+    } catch(e) {
+        console.error("DIAG1 FAIL:", e);
+    }
+});
+</script>
+</body>
+</html>
