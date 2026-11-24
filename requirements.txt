@@ -1,0 +1,8 @@
+# Dependências do jogo "Rust & Byte: O Despertar da Sucata"
+# Trabalho 2 - Tópicos Avançados em Computação (TAC)
+
+# pygame-ce (Pygame Community Edition) é 100% compatível com 'import pygame'
+pygame-ce>=2.5.0
+
+# numpy para serialização e compressão matricial de fases (.npz) no Editor
+numpy>=1.20.0

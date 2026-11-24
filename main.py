@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Ponto de Entrada Principal - Rust & Byte: O Despertar da Sucata
-Trabalho 1 - Disciplina: Tópicos Avançados em Computação (TAC)
+Trabalho 2 - Disciplina: Tópicos Avançados em Computação (TAC)
 Docente: Prof. Vanderson | Discente: Vitor de Souza
 """
 

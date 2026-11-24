@@ -1,0 +1,70 @@
+<svg id="render_diag_patterns" width="100%" height="auto" viewBox="0 0 840 450" xmlns="http://www.w3.org/2000/svg" style="max-width: 840px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <defs>
+    <style>
+      .cluster-bg { fill: #fefce8; stroke: #ca8a04; stroke-width: 1.5px; }
+      .cluster-title { font-size: 15px; font-weight: 700; fill: #713f12; text-anchor: middle; letter-spacing: 0.5px; }
+      .node-bg { fill: #f3e8ff; stroke: #9333ea; stroke-width: 1.5px; }
+      .node-title { font-size: 14px; font-weight: 700; fill: #3b0764; text-anchor: middle; }
+      .node-sub { font-size: 11.5px; font-weight: 500; fill: #6b21a8; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- CLUSTER 1: PADRÕES ARQUITETURAIS -->
+  <g class="cluster" id="cluster-arquiteturais">
+    <rect class="cluster-bg" x="15" y="12" width="810" height="115" rx="8" />
+    <text class="cluster-title" x="420" y="36">Padrões Arquiteturais</text>
+    
+    <g class="node" id="node-clientserver">
+      <rect class="node-bg" x="180" y="48" width="480" height="66" rx="6" />
+      <text class="node-title" x="420" y="72">Client-Server &amp; Thread Worker</text>
+      <text class="node-sub" x="420" y="96">(UDP Server &amp; Receiver Thread)</text>
+    </g>
+  </g>
+
+  <!-- CLUSTER 2: PADRÕES COMPORTAMENTAIS -->
+  <g class="cluster" id="cluster-comportamentais">
+    <rect class="cluster-bg" x="15" y="142" width="810" height="130" rx="8" />
+    <text class="cluster-title" x="420" y="166">Padrões Comportamentais</text>
+
+    <!-- Observer / Pub-Sub -->
+    <g class="node" id="node-observer">
+      <rect class="node-bg" x="35" y="180" width="240" height="74" rx="6" />
+      <text class="node-title" x="155" y="208">Observer / Pub-Sub</text>
+      <text class="node-sub" x="155" y="234">(Notify / EventBus)</text>
+    </g>
+
+    <!-- State Pattern -->
+    <g class="node" id="node-state">
+      <rect class="node-bg" x="300" y="180" width="240" height="74" rx="6" />
+      <text class="node-title" x="420" y="208">State Pattern</text>
+      <text class="node-sub" x="420" y="234">(GameState &amp; CharacterState)</text>
+    </g>
+
+    <!-- Command Pattern -->
+    <g class="node" id="node-command">
+      <rect class="node-bg" x="565" y="180" width="240" height="74" rx="6" />
+      <text class="node-title" x="685" y="208">Command Pattern</text>
+      <text class="node-sub" x="685" y="234">(InputManager &amp; Actions)</text>
+    </g>
+  </g>
+
+  <!-- CLUSTER 3: PADRÕES CRIACIONAIS -->
+  <g class="cluster" id="cluster-criacionais">
+    <rect class="cluster-bg" x="15" y="287" width="810" height="135" rx="8" />
+    <text class="cluster-title" x="420" y="311">Padrões Criacionais</text>
+
+    <!-- Singleton -->
+    <g class="node" id="node-singleton">
+      <rect class="node-bg" x="45" y="325" width="350" height="76" rx="6" />
+      <text class="node-title" x="220" y="353">Singleton</text>
+      <text class="node-sub" x="220" y="380">(Game, Display, Config, Audio)</text>
+    </g>
+
+    <!-- Flyweight / Factory -->
+    <g class="node" id="node-flyweight">
+      <rect class="node-bg" x="445" y="325" width="350" height="76" rx="6" />
+      <text class="node-title" x="620" y="353">Flyweight / Factory</text>
+      <text class="node-sub" x="620" y="380">(TileMap, Pallet, Tiles)</text>
+    </g>
+  </g>
+</svg>

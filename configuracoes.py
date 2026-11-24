@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Módulo de Configurações e Constantes do Jogo
-Rust & Byte: O Despertar da Sucata
+Rust & Byte: O Despertar da Sucata - Trabalho 2 (TAC)
 """
 
 # Dimensões da Janela e Display
 LARGURA_TELA = 840
 ALTURA_TELA = 480
-TITULO_JOGO = "Rust & Byte: O Despertar da Sucata"
+TITULO_JOGO = "Rust & Byte: O Despertar da Sucata (Trabalho 2 - TAC)"
 FPS = 60
 
 # Tamanho padrão dos blocos (Tiles)
@@ -25,9 +25,12 @@ COR_TEXTO = (240, 240, 245)
 COR_TEXTO_MUTED = (160, 165, 180)
 COR_DESTAQUE = (245, 160, 30)       # Âmbar / Alerta
 
-# Cores de Entidades e Efeitos
-COR_JOGADOR_CHASSI = (50, 160, 220)  # Azul metálico / Ciano
-COR_JOGADOR_OLHO = (255, 240, 60)    # Amarelo neon
+# Cores dos Protagonistas
+COR_JOGADOR_CHASSI = (50, 160, 220)  # Scrappy (P1) - Azul Aço / Ciano
+COR_JOGADOR_OLHO = (255, 240, 60)    # Scrappy - Amarelo Neon
+COR_BYTE_CHASSI = (205, 120, 50)     # Byte (P2) - Bronze / Cobre
+COR_BYTE_OLHO = (80, 255, 160)       # Byte - Verde Esmeralda
+
 COR_TIRO_PLASMA = (0, 230, 255)      # Ciano brilhante
 COR_TIRO_INIMIGO = (255, 80, 60)     # Laranja avermelhado
 
@@ -61,3 +64,7 @@ FRAMES_INVULNERABILIDADE = 70        # Tempo de piscar após sofrer dano (~1.15s
 CADENCIA_TIRO_NORMAL = 14            # Frames entre tiros (~4.2 tiros por seg)
 DURACAO_TIRO_TRIPLO_FRAMES = 600     # 10 segundos de Power-Up
 VELOCIDADE_PROJETIL = 9.0
+
+# Rede LAN
+PORTA_LAN_PADRAO = 5555
+TIMEOUT_LAN_SEGUNDOS = 5.0

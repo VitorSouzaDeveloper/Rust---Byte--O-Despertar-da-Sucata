@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Módulo do Jogador Principal (Scrappy - Robô B-09)
+Módulo dos Jogadores (Scrappy - Robô B-09 e Byte - Robô K-12)
 Rust & Byte: O Despertar da Sucata
+
+Implementa suporte a modo solo e cooperativo de 2 jogadores (LAN),
+além do proxy de interpolação suave (JogadorRemoto) para sincronização UDP.
 """
 
 import pygame
@@ -10,20 +13,19 @@ from configuracoes import (
     ACELERACAO_CHAO, ATRITO_CHAO, ATRITO_AR, FORCA_PULO, CORTE_PULO,
     FORCA_PULO_DUPLO, VELOCIDADE_DASH, DURACAO_DASH_FRAMES, RECARGA_DASH_FRAMES,
     VIDA_MAX_JOGADOR, FRAMES_INVULNERABILIDADE, CADENCIA_TIRO_NORMAL,
-    DURACAO_TIRO_TRIPLO_FRAMES, COR_JOGADOR_CHASSI, COR_JOGADOR_OLHO
+    COR_JOGADOR_CHASSI, COR_JOGADOR_OLHO
+)
+from notify import (
+    notify, EVENTO_DANO_JOGADOR, EVENTO_DISPARO, EVENTO_PULO, EVENTO_DASH
 )
 
 
 def _criar_superficie_scrappy(olhando_direita=True, agachado=False, atirando_cima=False):
-    """
-    Desenha programaticamente o sprite do robô B-09 (Scrappy) em Pixel Art.
-    Retorna uma pygame.Surface com canal alfa (transparência).
-    """
+    """Desenha programaticamente o sprite do robô B-09 (Scrappy - Azul Aço)."""
     largura = 28
     altura = 18 if agachado else 32
     surf = pygame.Surface((largura, altura), pygame.SRCALPHA)
 
-    # Cores
     cor_corpo = COR_JOGADOR_CHASSI
     cor_chapa_escura = (30, 90, 140)
     cor_visor = (20, 25, 35)
@@ -32,7 +34,7 @@ def _criar_superficie_scrappy(olhando_direita=True, agachado=False, atirando_cim
     cor_antena = (240, 160, 30)
 
     if not agachado:
-        # Antena / Parafuso no topo
+        # Antena no topo
         pygame.draw.line(surf, cor_antena, (14, 0), (14, 4), 2)
         pygame.draw.circle(surf, cor_antena, (14, 1), 2)
 
@@ -45,26 +47,72 @@ def _criar_superficie_scrappy(olhando_direita=True, agachado=False, atirando_cim
         visor_rect = pygame.Rect(7 + offset_olho, 7, 12, 7)
         pygame.draw.rect(surf, cor_visor, visor_rect, border_radius=2)
 
-        # Olho de plasma brilhante
         if atirando_cima:
             pygame.draw.rect(surf, cor_olho, (11 + offset_olho, 8, 4, 2))
         else:
             olho_x = (13 + offset_olho) if olhando_direita else (9 + offset_olho)
             pygame.draw.rect(surf, cor_olho, (olho_x, 9, 3, 3))
 
-        # Tronco / Compartimento de Bateria
+        # Tronco
         pygame.draw.rect(surf, cor_chapa_escura, (6, 20, 16, 7))
         pygame.draw.rect(surf, cor_detalhe, (8, 22, 12, 3))
 
-        # Pernas / Esteiras mecânicas
+        # Esteiras mecânicas
         pygame.draw.rect(surf, (40, 45, 55), (5, 27, 7, 5), border_radius=2)
         pygame.draw.rect(surf, (40, 45, 55), (16, 27, 7, 5), border_radius=2)
     else:
-        # Versão agachada (perfil rebaixado para esquiva de tiros)
         pygame.draw.rect(surf, cor_corpo, (4, 2, 20, 12), border_radius=3)
         pygame.draw.rect(surf, cor_visor, (8, 4, 12, 6), border_radius=2)
         pygame.draw.rect(surf, cor_olho, (12, 6, 4, 3))
         pygame.draw.rect(surf, (40, 45, 55), (4, 14, 20, 4), border_radius=2)
+
+    return surf
+
+
+def _criar_superficie_byte(olhando_direita=True, agachado=False, atirando_cima=False):
+    """Desenha programaticamente o sprite do robô K-12 (Byte - Bronze / Cobre Oxidado)."""
+    largura = 28
+    altura = 18 if agachado else 32
+    surf = pygame.Surface((largura, altura), pygame.SRCALPHA)
+
+    cor_corpo = (205, 120, 50)       # Cobre / Bronze
+    cor_chapa_escura = (130, 65, 20)  # Cobre escovado escuro
+    cor_visor = (25, 20, 15)
+    cor_olho = (80, 255, 160)         # Verde Esmeralda Neon
+    cor_detalhe = (240, 190, 120)
+    cor_antena = (255, 200, 40)
+
+    if not agachado:
+        # Tubo de exaustão angular
+        pygame.draw.line(surf, cor_antena, (12, 0), (12, 4), 3)
+        pygame.draw.circle(surf, cor_antena, (12, 1), 3)
+
+        # Chassi angular de cobre
+        pygame.draw.rect(surf, cor_corpo, (4, 4, 20, 16), border_radius=2)
+        pygame.draw.rect(surf, cor_chapa_escura, (4, 4, 20, 16), 1, border_radius=2)
+
+        offset_olho = 2 if olhando_direita else -2
+        visor_rect = pygame.Rect(7 + offset_olho, 7, 12, 7)
+        pygame.draw.rect(surf, cor_visor, visor_rect, border_radius=1)
+
+        if atirando_cima:
+            pygame.draw.rect(surf, cor_olho, (11 + offset_olho, 8, 4, 2))
+        else:
+            olho_x = (13 + offset_olho) if olhando_direita else (9 + offset_olho)
+            pygame.draw.rect(surf, cor_olho, (olho_x, 9, 3, 3))
+
+        # Tronco
+        pygame.draw.rect(surf, cor_chapa_escura, (6, 20, 16, 7))
+        pygame.draw.rect(surf, cor_detalhe, (8, 22, 12, 3))
+
+        # Pernas de pistão hidráulico
+        pygame.draw.rect(surf, (60, 40, 30), (5, 27, 7, 5), border_radius=1)
+        pygame.draw.rect(surf, (60, 40, 30), (16, 27, 7, 5), border_radius=1)
+    else:
+        pygame.draw.rect(surf, cor_corpo, (4, 2, 20, 12), border_radius=2)
+        pygame.draw.rect(surf, cor_visor, (8, 4, 12, 6), border_radius=1)
+        pygame.draw.rect(surf, cor_olho, (12, 6, 4, 3))
+        pygame.draw.rect(surf, (60, 40, 30), (4, 14, 20, 4), border_radius=1)
 
     return surf
 
@@ -89,21 +137,23 @@ class RastroFantasma:
 
 
 class Jogador(pygame.sprite.Sprite):
-    """Entidade do jogador principal (Scrappy)."""
+    """Entidade controlável do jogador (Scrappy ou Byte)."""
 
-    def __init__(self, pos_x, pos_y, gerenciador_audio):
+    def __init__(self, pos_x, pos_y, gerenciador_audio, tipo="scrappy"):
         super().__init__()
         self.audio = gerenciador_audio
+        self.tipo = tipo
 
         # Estados de pose e direção
         self.olhando_direita = True
         self.agachado = False
         self.mirando_cima = False
 
-        # Gerar superfícies de animação básicas
-        self.surf_normal = _criar_superficie_scrappy(olhando_direita=True, agachado=False)
-        self.surf_agachado = _criar_superficie_scrappy(olhando_direita=True, agachado=True)
-        self.surf_cima = _criar_superficie_scrappy(olhando_direita=True, agachado=False, atirando_cima=True)
+        # Gerar superfícies de animação básicas pelo tipo
+        func_surf = _criar_superficie_byte if tipo == "byte" else _criar_superficie_scrappy
+        self.surf_normal = func_surf(olhando_direita=True, agachado=False)
+        self.surf_agachado = func_surf(olhando_direita=True, agachado=True)
+        self.surf_cima = func_surf(olhando_direita=True, agachado=False, atirando_cima=True)
 
         self.image = self.surf_normal
         self.rect = self.image.get_rect(topleft=(pos_x, pos_y))
@@ -131,18 +181,16 @@ class Jogador(pygame.sprite.Sprite):
         self.pontos = 0
         self.timer_invulnerabilidade = 0
         self.cooldown_tiro = 0
-        self.tempo_tiro_triplo = 0  # Duração do power-up
+        self.tempo_tiro_triplo = 0
 
     def atualizar_entradas(self, teclas):
         """Lê comandos do teclado e aplica intenção de movimento."""
         if self.no_dash:
-            return  # Durante o dash, a movimentação é guiada pelo impulso
+            return
 
-        # Direção de mira e postura
         self.agachado = teclas[pygame.K_s] or teclas[pygame.K_DOWN]
         self.mirando_cima = teclas[pygame.K_w] or teclas[pygame.K_UP]
 
-        # Movimento Horizontal
         mover_esq = teclas[pygame.K_a] or teclas[pygame.K_LEFT]
         mover_dir = teclas[pygame.K_d] or teclas[pygame.K_RIGHT]
 
@@ -157,14 +205,12 @@ class Jogador(pygame.sprite.Sprite):
                 self.vel_x = VELOCIDADE_CORRIDA
             self.olhando_direita = True
         else:
-            # Desaceleração / Atrito suave
             atrito = ATRITO_CHAO if self.no_chao else ATRITO_AR
             if self.vel_x > 0:
                 self.vel_x = max(0.0, self.vel_x - atrito)
             elif self.vel_x < 0:
                 self.vel_x = min(0.0, self.vel_x + atrito)
 
-        # Se estiver agachado no chão, desacelera mais rápido
         if self.agachado and self.no_chao:
             self.vel_x *= 0.5
 
@@ -178,11 +224,12 @@ class Jogador(pygame.sprite.Sprite):
             self.no_chao = False
             self.pulos_restantes = 1
             self.audio.tocar("som_pulo")
+            notify.emit(EVENTO_PULO, jogador=self.tipo)
         elif self.pulos_restantes > 0:
-            # Salto duplo (micro-jetpack de CO2)
             self.vel_y = FORCA_PULO_DUPLO
             self.pulos_restantes -= 1
             self.audio.tocar("som_pulo_duplo")
+            notify.emit(EVENTO_PULO, jogador=self.tipo, duplo=True)
 
     def cortar_pulo(self):
         """Permite altura variável de pulo ao soltar a tecla no ar."""
@@ -197,8 +244,9 @@ class Jogador(pygame.sprite.Sprite):
             self.recarga_dash = RECARGA_DASH_FRAMES
             direcao = 1.0 if self.olhando_direita else -1.0
             self.vel_x = direcao * VELOCIDADE_DASH
-            self.vel_y = 0.0  # Anula gravidade no dash
+            self.vel_y = 0.0
             self.audio.tocar("som_dash")
+            notify.emit(EVENTO_DASH, jogador=self.tipo)
 
     def atirar(self, grupo_projeteis):
         """Gera projéteis conforme o cooldown e a arma atual."""
@@ -208,11 +256,9 @@ class Jogador(pygame.sprite.Sprite):
         self.cooldown_tiro = CADENCIA_TIRO_NORMAL
         from entidades import Projetil
 
-        # Ponto de origem do disparo (cano da arma de Scrappy)
         origem_x = self.rect.right if self.olhando_direita else self.rect.left
         origem_y = self.rect.centery
 
-        # Define ângulo/direção do projétil
         if self.mirando_cima:
             dir_x, dir_y = 0.0, -1.0
             origem_x = self.rect.centerx
@@ -225,14 +271,12 @@ class Jogador(pygame.sprite.Sprite):
             dir_x = 1.0 if self.olhando_direita else -1.0
             dir_y = 0.0
 
-        # Arma Normal ou Tiro Triplo (Spread Shot)
+        notify.emit(EVENTO_DISPARO, jogador=self.tipo)
+
         if self.tempo_tiro_triplo > 0:
             self.audio.tocar("som_tiro_triplo")
-            # Disparo central
             grupo_projeteis.add(Projetil(origem_x, origem_y, dir_x, dir_y, e_do_jogador=True))
-            # Disparo inclinado para cima
             grupo_projeteis.add(Projetil(origem_x, origem_y, dir_x, dir_y - 0.35, e_do_jogador=True))
-            # Disparo inclinado para baixo
             grupo_projeteis.add(Projetil(origem_x, origem_y, dir_x, dir_y + 0.35, e_do_jogador=True))
         else:
             self.audio.tocar("som_tiro")
@@ -243,16 +287,31 @@ class Jogador(pygame.sprite.Sprite):
         if self.timer_invulnerabilidade <= 0 and not self.no_dash:
             self.vida -= quantidade
             self.timer_invulnerabilidade = FRAMES_INVULNERABILIDADE
-            # Recuo (Knockback)
             self.vel_y = -4.0
             self.vel_x = -3.0 if self.olhando_direita else 3.0
             self.audio.tocar("som_dano_jogador")
+            notify.emit(EVENTO_DANO_JOGADOR, jogador=self.tipo, vida_restante=self.vida)
             return True
         return False
 
+    def respawn(self, pos_x, pos_y):
+        """Ressuscita o jogador nas coordenadas indicadas com invulnerabilidade temporária."""
+        self.pos_x = float(pos_x)
+        self.pos_y = float(pos_y)
+        self.rect.x = int(pos_x)
+        self.rect.y = int(pos_y)
+        self.vel_x = 0.0
+        self.vel_y = 0.0
+        self.no_dash = False
+        self.timer_dash = 0
+        self.recarga_dash = 0
+        self.pulos_restantes = 2
+        self.vida = VIDA_MAX_JOGADOR
+        self.timer_invulnerabilidade = 120  # ~2 segundos piscando com invulnerabilidade
+        self.audio.tocar("som_item")
+
     def atualizar_fisica(self, plataformas, esteiras):
         """Integração numérica da física com resolução AABB de colisões."""
-        # 1. Atualizar contadores de cooldown
         if self.cooldown_tiro > 0:
             self.cooldown_tiro -= 1
         if self.recarga_dash > 0:
@@ -262,25 +321,21 @@ class Jogador(pygame.sprite.Sprite):
         if self.tempo_tiro_triplo > 0:
             self.tempo_tiro_triplo -= 1
 
-        # 2. Controle do estado de Dash
         if self.no_dash:
             self.timer_dash -= 1
-            # Criar rastro fantasma a cada 2 frames
             if self.timer_dash % 2 == 0:
                 self.rastros_dash.append(RastroFantasma(self.rect.x, self.rect.y, self.image))
             if self.timer_dash <= 0:
                 self.no_dash = False
                 self.vel_x *= 0.4
         else:
-            # Gravidade convencional
             self.vel_y += GRAVIDADE
             if self.vel_y > VELOCIDADE_MAX_QUEDA:
                 self.vel_y = VELOCIDADE_MAX_QUEDA
 
-        # Atualizar e limpar rastros
         self.rastros_dash = [r for r in self.rastros_dash if r.atualizar()]
 
-        # 3. Movimento Horizontal e Colisões
+        # Movimento Horizontal
         self.pos_x += self.vel_x
         self.rect.x = int(self.pos_x)
 
@@ -293,30 +348,30 @@ class Jogador(pygame.sprite.Sprite):
                 self.pos_x = float(self.rect.x)
                 self.vel_x = 0.0
 
-        # 4. Movimento Vertical e Colisões
+        # Movimento Vertical
         self.pos_y += self.vel_y
         self.rect.y = int(self.pos_y)
         self.no_chao = False
 
         for plat in plataformas:
             if self.rect.colliderect(plat.rect):
-                if self.vel_y > 0:  # Caindo no chão
+                if self.vel_y > 0:
                     self.rect.bottom = plat.rect.top
                     self.vel_y = 0.0
                     self.no_chao = True
                     self.pulos_restantes = 2
-                elif self.vel_y < 0:  # Batendo no teto
+                elif self.vel_y < 0:
                     self.rect.top = plat.rect.bottom
                     self.vel_y = 0.0
                 self.pos_y = float(self.rect.y)
 
-        # 5. Influência das Esteiras Rolantes
+        # Esteiras Rolantes
         for esteira in esteiras:
             if self.rect.colliderect(esteira.rect_gatilho):
                 self.pos_x += esteira.velocidade_esteira
                 self.rect.x = int(self.pos_x)
 
-        # 6. Atualizar sprite visual correto
+        # Atualizar pose visual
         if self.agachado and self.no_chao:
             base = self.surf_agachado
         elif self.mirando_cima:
@@ -331,13 +386,56 @@ class Jogador(pygame.sprite.Sprite):
 
     def desenhar(self, superficie, deslocamento_camera_x, deslocamento_camera_y):
         """Renderiza o jogador e seus rastros de dash na tela."""
-        # Desenha rastros fantasma do dash
         for rastro in self.rastros_dash:
             rastro.desenhar(superficie, deslocamento_camera_x, deslocamento_camera_y)
 
-        # Efeito de piscar quando invulnerável
         if self.timer_invulnerabilidade > 0 and (self.timer_invulnerabilidade // 4) % 2 == 0:
-            return  # Frame invisível do piscar
+            return
 
         pos_tela = (self.rect.x - deslocamento_camera_x, self.rect.y - deslocamento_camera_y)
         superficie.blit(self.image, pos_tela)
+
+
+class JogadorRemoto:
+    """Proxy visual do parceiro cooperativo conectado via rede local (UDP)."""
+    def __init__(self, tipo="byte"):
+        self.tipo = tipo
+        self.x = 100.0
+        self.y = 100.0
+        self.olhando_direita = True
+        self.vida = 3
+        self.ativo = True
+
+        func_surf = _criar_superficie_byte if tipo == "byte" else _criar_superficie_scrappy
+        self.surf_dir = func_surf(olhando_direita=True)
+        self.surf_esq = pygame.transform.flip(self.surf_dir, True, False)
+        self.fonte_tag = pygame.font.SysFont("Arial", 10, bold=True)
+
+    def atualizar_dados(self, x, y, olhando_dir, vida):
+        """Atualiza a posição interpolada pelo cliente LERP."""
+        self.x = x
+        self.y = y
+        self.olhando_direita = olhando_dir
+        self.vida = vida
+        self.ativo = True
+
+    def desenhar(self, superficie, deslocamento_camera_x, deslocamento_camera_y):
+        if not self.ativo:
+            return
+
+        px = int(self.x - deslocamento_camera_x)
+        py = int(self.y - deslocamento_camera_y)
+
+        surf = self.surf_dir if self.olhando_direita else self.surf_esq
+        superficie.blit(surf, (px, py))
+
+        # Tag de identificação sobre a cabeça
+        nome = "P2 (Byte)" if self.tipo == "byte" else "P1 (Scrappy)"
+        tag = self.fonte_tag.render(nome, True, (255, 220, 100) if self.tipo == "byte" else (100, 220, 255))
+        superficie.blit(tag, (px + 14 - tag.get_width() // 2, py - 14))
+
+        # Mini barra de HP do parceiro
+        pygame.draw.rect(superficie, (40, 45, 55), (px + 2, py - 4, 24, 4))
+        larg_hp = int(24 * (self.vida / 3.0))
+        if larg_hp > 0:
+            pygame.draw.rect(superficie, (50, 220, 120), (px + 2, py - 4, larg_hp, 4))

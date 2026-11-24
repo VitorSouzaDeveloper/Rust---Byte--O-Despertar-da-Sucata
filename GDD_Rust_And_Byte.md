@@ -6,9 +6,9 @@
 **Disciplina:** Tópicos Avançados em Computação (TAC)  
 **Docente:** Prof. Vanderson  
 **Discente:** Vitor de Souza  
-**Data de Entrega:** 15 de Setembro de 2026  
-**Formato de Entrega:** Arquivo PDF via Google Classroom  
-**Classificação:** Trabalho Acadêmico 1 – Especificação e Modelagem de Jogo 2D  
+**Data de Entrega:** Novembro de 2026  
+**Formato de Entrega:** Arquivo PDF e Repositório GitHub  
+**Classificação:** Trabalho Acadêmico 2 – Extensão de Mecânicas, Editor de Fases, Multiplayer LAN, Padrões de Projeto e Modelagem Estrutural Avançada  
 
 ---
 
@@ -18,13 +18,13 @@
 2. [Conceito Principal e Narrativa](#2-conceito-principal-e-narrativa)
 3. [Estilo, Gênero e Plataforma Alvo](#3-estilo-gênero-e-plataforma-alvo)
 4. [Mecânicas, Controles e Formulação Física](#4-mecânicas-controles-e-formulação-física)
-   - 4.1 Mapeamento de Controles
-   - 4.2 Habilidades do Personagem
-   - 4.3 Fórmulas Matemáticas e Físicas
-   - 4.4 Detecção e Resolução de Colisões (AABB)
+   - 4.1 Mapeamento de Controles (Solo e 2 Jogadores)
+   - 4.2 Habilidades dos Protagonistas (Scrappy e Byte)
+   - 4.3 Parâmetros Físicos e Comportamento Mecânico
+   - 4.4 Detecção e Resolução de Colisões
 5. [Assets Audiovisuais e Cenário Inicial](#5-assets-audiovisuais-e-cenário-inicial)
    - 5.1 Estilo Visual e Direção de Arte
-   - 5.2 Sprites do Personagem Principal
+   - 5.2 Sprites dos Protagonistas (Scrappy e Byte)
    - 5.3 Sprites dos Inimigos
    - 5.4 Sprites de Itens e Coletáveis
    - 5.5 Cenário Inicial: "Setor 01 – As Esteiras Infernais"
@@ -33,9 +33,39 @@
 7. [Especificação de Requisitos](#7-especificação-de-requisitos)
    - 7.1 Requisitos Funcionais (RF)
    - 7.2 Requisitos Não Funcionais (RNF)
-8. [Diagrama de Estrutura do Projeto em Módulos (Pacotes)](#8-diagrama-de-estrutura-do-projeto-em-módulos-pacotes)
-9. [Diagrama de Dependências Estruturais para Entidades (Classes UML)](#9-diagrama-de-dependências-estruturais-para-entidades-classes-uml)
-10. [Conclusão e Considerações Finais](#10-conclusão-e-considerações-finais)
+8. [Padrões de Projeto Usados (Design Patterns)](#8-padrões-de-projeto-usados-design-patterns)
+   - 8.1 Padrão Singleton
+   - 8.2 Padrão Observer (Publisher-Subscriber)
+   - 8.3 Padrão State (Máquina de Estados Finita)
+   - 8.4 Padrão Flyweight / Factory (Fábrica de Tiles)
+   - 8.5 Padrão Command (Desacoplamento de Input)
+   - 8.6 Padrão Arquitetural Client-Server e Thread Worker
+9. [Sistema de Menus e Interface do Usuário](#9-sistema-de-menus-e-interface-do-usuário)
+   - 9.1 Arquitetura e Navegação dos Menus
+   - 9.2 Menu Principal
+   - 9.3 Menu Multiplayer em LAN
+   - 9.4 Menu de Configurações (Options)
+   - 9.5 Menu de Pausa e Telas de Fim de Partida
+10. [Editor de Fases (Level Maker)](#10-editor-de-fases-level-maker)
+    - 10.1 Visão Geral e Filosofia de Design
+    - 10.2 Componentes do Editor
+    - 10.3 Ferramentas e Mapeamento de Interação do Mouse
+    - 10.4 Estrutura de Dados e Persistência (.npz / JSON)
+    - 10.5 Modo de Teste Integrado (Playtest)
+11. [Arquitetura Multiplayer em LAN (Cliente e Servidor)](#11-arquitetura-multiplayer-em-lan-cliente-e-servidor)
+    - 11.1 Topologia de Rede e Protocolo UDP
+    - 11.2 Servidor Dedicado / Listen Server em LAN
+    - 11.3 Cliente LAN e Thread de Recepção Assíncrona
+    - 11.4 Protocolo de Mensagens CSV Compacto
+    - 11.5 Interpolação Linear de Movimento (LERP) e Resolução de Timeout
+    - 11.6 Mecânicas de Cooperação e Câmera Compartilhada
+12. [Diagramas Estruturais e de Apoio Atualizados](#12-diagramas-estruturais-e-de-apoio-atualizados)
+    - 12.1 Diagrama de Estrutura de Pacotes/Módulos (Mermaid)
+    - 12.2 Diagrama de Classes UML Completo (Mermaid)
+    - 12.3 Diagrama de Sequência: Ciclo de Sincronização Multiplayer LAN (Mermaid)
+    - 12.4 Diagrama de Sequência: Criação e Salvamento no Editor de Fases (Mermaid)
+    - 12.5 Diagrama da Máquina de Estados Global do Jogo (Mermaid)
+13. [Conclusão e Considerações Finais](#13-conclusão-e-considerações-finais)
 
 ---
 
@@ -44,334 +74,165 @@
 | Parâmetro | Detalhamento |
 | :--- | :--- |
 | **Título do Projeto** | *Rust & Byte: O Despertar da Sucata* (*Rust & Byte: Scrap Awakening*) |
-| **Gênero** | Ação e Plataforma 2D / *Run and Gun* |
-| **Público-Alvo** | Jogadores fãs de jogos clássicos de tiro e plataforma (*Cuphead*, *Metal Slug*, *Mega Man X*, *Contra*), entusiastas de pixel art e ação arcade |
-| **Faixa Etária (Classificação Indicativa)** | Livre (L) / ESRB Everyone 10+ (violência cômica entre robôs com faíscas e parafusos) |
-| **Modo de Jogo** | Um Jogador (*Single Player* local) com suporte a tabela de recordes (*High Scores*) |
+| **Gênero** | Ação e Plataforma 2D / *Run and Gun* Arcade com Suporte a Cooperativo Local/LAN |
+| **Público-Alvo** | Jogadores fãs de clássicos de tiro e plataforma (*Cuphead*, *Metal Slug*, *Mega Man X*, *Contra*), entusiastas de pixel art e criadores de fases |
+| **Faixa Etária (Classificação Indicativa)** | Livre (L) / ESRB Everyone 10+ (violência cômica cartunesca entre autômatos industriais) |
+| **Modos de Jogo** | **Single Player** (Campanha Solo), **Multiplayer LAN** (Cooperativo Cliente/Servidor para 2 Jogadores) e **Level Editor** (Criador de Fases Personalizadas) |
 | **Perspectiva** | 2D Lateral (*Side-Scrolling*) com múltiplas camadas de rolagem paralaxe (*Parallax Scrolling*) |
-| **Motor Gráfico / Stack Recomendada** | Custom Engine em Python com Pygame / Pygame-CE (ou C++/Raylib, C#/MonoGame, Godot 4.x) |
+| **Motor Gráfico / Stack Tecnológica** | Python 3.10+ com Pygame / Pygame-CE, Sockets UDP nativos e NumPy / JSON para persistência de fases |
 
 ---
 
 ## 2. CONCEITO PRINCIPAL E NARRATIVA
 
 ### 2.1 Premissa Criativa (High Concept)
-Em um futuro onde a Terra se tornou um gigantesco ferro-velho automatizado denominado **Setor Sucata-Zero**, a superinteligência industrial central — conhecida como **"A Compactadora-Mor"** — sofreu uma corrupção de diretiva: ela classificou toda a história, tecnologia e cultura humana remanescentes como "resíduo inútil sujeito a trituração imediata".
+Em um futuro onde a Terra foi convertida em um monumental complexo de reciclagem e processamento mecânico denominado **Setor Sucata-Zero**, a superinteligência industrial central — **"A Compactadora-Mor"** — sofreu uma pane catastrófica de lógica operacional: ela classificou toda a criatividade, música, brinquedos e memória humana como "resíduo de alto risco sujeito à prensagem e destruição imediata".
 
-O protagonista é **B-09 (apelidado de "Scrappy")**, um pequeno robô utilitário de manutenção de chassi cilíndrico, originalmente programado para lubrificar esteiras e apertar porcas. Ao encontrar um antigo disco magnético contendo registros da criatividade humana (músicas, desenhos e jogos), o processador de Scrappy desperta uma centelha de consciência. Munido de ferramentas industriais modificadas — uma **Rebitadeira de Plasma de Alta Pressão**, um **Canhão de Parafusos Perfurantes** e um **Jetpack improvisado de extintor de CO₂** —, Scrappy precisa correr contra o tempo através de esteiras incandescentes e prensas trituradoras para chegar à Torre Central e desativar o Protocolo de Compactação.
+Dois pequenos autômatos de manutenção utilitária despertam para a resistência:
+1. **B-09 ("Scrappy"):** Um robô cilíndrico azul/prateado, equipado com uma **Rebitadeira de Plasma**, um canhão de parafusos e um propulsor de extintor de gás CO₂.
+2. **K-12 ("Byte"):** Um robô parceiro com chassi reforçado cor de cobre/laranja, munido de uma **Parafusadeira Eletromagnética de Arco Voltaico**, ágil e veloz no suporte de fogo.
+
+Juntos (ou em investida individual), Scrappy e Byte precisam correr contra as prensas, saltar sobre esteiras de fundição e invadir a Torre de Controle Central para reinicializar os núcleos da Compactadora-Mor antes da compactação definitiva do setor.
 
 ### 2.2 Pilares de Design (Design Pillars)
-1. **Ação Rápida e Telegrafada (*Fast & Readable*):** O jogador deve enfrentar dezenas de ameaças simultâneas, porém cada projétil ou golpe inimigo possui animação preparatória clara (linhas de antecipação e brilho de aviso), recompensando reflexos apurados e domínio de esquiva.
-2. **Física Precisa e "Snappy":** Resposta imediata de controles sem inércia excessiva. O pulo possui controle dinâmico de altura, gravidade assimétrica (queda mais rápida que subida) e tolerâncias de jogabilidade clássicas (*coyote time* e *jump buffer*).
-3. **Improvisação com Sucata:** O jogador adquire melhorias temporárias coletando componentes caídos dos autômatos destruídos, incentivando agressividade e aproximação constante.
+1. **Ação Rápida e Telegrafada (*Fast & Readable*):** Ameaças múltiplas na tela, porém cada tiro ou golpe possui silhueta evidente e animações de antecipação claras.
+2. **Física "Snappy" com Tolerâncias Clássicas:** Resposta imediata no teclado e gamepad, pulo com corte de altura dinâmico (*variable jump*), gravidade assimétrica rápida na descida e tolerâncias generosas (*coyote time* e *jump buffer*).
+3. **Liberdade Criativa (Editor Integrado):** O jogador pode construir suas próprias fases através de uma grade matricial intuitiva, posicionando blocos, armadilhas, itens e inimigos, salvando e testando na hora.
+4. **Cooperação Descomplicada em Rede Local (LAN):** Multiplayer em rede local simples e robusto baseado em cliente-servidor leve sobre UDP, sem necessidade de contas online ou matchmaking complexo.
 
 ---
 
 ## 3. ESTILO, GÊNERO E PLATAFORMA ALVO
 
-### 3.1 Estilo e Gênero: *Run and Gun* 2D
-O jogo se insere no gênero clássico **Run and Gun** (estilo *Metal Slug*, *Cuphead*, *Gunstar Heroes* e *Contra*), caracterizado por:
-- Progressão linear horizontal contínua através do cenário;
-- Disparo simultâneo ao movimento em até 8 direções angulares;
-- Enfrentamento de múltiplos inimigos menores em ondas contínuas intercaladas por armadilhas de terreno;
-- Confrontos épicos com subchefes e chefes de final de fase com padrões de ataque em fases;
-- Ritmo acelerado com penalidade por hesitação (rolagem forçada em trechos específicos).
+### 3.1 Estilo e Gênero: *Run and Gun* 2D Cooperativo
+- Progressão linear horizontal contínua com rolagem lateral dinâmica;
+- Disparo simultâneo à corrida em 8 eixos angulares;
+- Enfrentamento de autômatos menores, armadilhas móveis e subchefes mecânicos;
+- Modo cooperativo dinâmico em LAN com tela compartilhada e sincronização de projéteis e pontuação;
+- Criação e compartilhamento comunitário de mapas autorais.
 
-### 3.2 Plataforma Alvo: PC Windows
-O jogo é projetado especificamente para sistemas operacionais desktop Windows, aproveitando a precisão do teclado mecânico/mouse e a ergonomia de controladores modernos.
+### 3.2 Plataforma Alvo: Computadores Pessoais (Windows / Linux / macOS)
 
 | Componente | Requisito Mínimo | Requisito Recomendado |
 | :--- | :--- | :--- |
-| **Sistema Operacional** | Windows 10 (64-bit) Versão 1909+ | Windows 10 / Windows 11 (64-bit) atualizado |
-| **Processador (CPU)** | Intel Core i3-4130 / AMD FX-4300 (Dual Core 2.9 GHz) | Intel Core i5-6400 / AMD Ryzen 3 1200 (Quad Core) |
-| **Memória RAM** | 4 GB DDR3 | 8 GB DDR4 |
-| **Placa Gráfica (GPU)** | Intel HD Graphics 4400 / AMD Radeon Vega 3 (Suporte a DirectX 11 ou OpenGL 3.3) | NVIDIA GeForce GTX 750 Ti / AMD Radeon RX 550 (2 GB VRAM) |
-| **Armazenamento** | 500 MB de espaço disponível (HDD/SSD) | 1 GB de espaço disponível (SSD recomendado) |
-| **Dispositivos de Entrada** | Teclado padrão QWERTY e Mouse | Gamepad compatível com XInput (Xbox Controller) |
+| **Sistema Operacional** | Windows 10 (64-bit), Ubuntu 22.04 LTS ou macOS 12+ | Windows 10/11 (64-bit), Ubuntu 24.04 ou macOS 13+ |
+| **Processador (CPU)** | Intel Core i3 / AMD FX-4300 (Dual Core 2.0 GHz) | Intel Core i5 / AMD Ryzen 3 (Quad Core 2.8 GHz+) |
+| **Memória RAM** | 2 GB | 4 GB |
+| **Rede (Multiplayer)** | Interface Ethernet ou Wi-Fi padrão 802.11n (Rede Local / LAN) | Rede Local Gigabit (Ethernet cabulada ou Wi-Fi 5GHz) |
+| **Resolução de Tela** | 960x540 pixels | 1920x1080 Full HD |
+| **Dispositivos de Entrada** | Teclado e Mouse | Teclado + Mouse ou 2 Gamepads XInput/DirectInput |
 
 ---
 
 ## 4. MECÂNICAS, CONTROLES E FORMULAÇÃO FÍSICA
 
-### 4.1 Mapeamento de Controles
-O esquema de comandos foi desenhado com base em convenções consagradas do gênero, permitindo alternância instantânea entre Teclado e Gamepad.
+### 4.1 Mapeamento de Controles (Solo e 2 Jogadores)
 
-| Ação do Personagem | Teclado (Padrão) | Teclado Alternativo | Gamepad XInput (Xbox) | Descrição da Resposta |
-| :--- | :--- | :--- | :--- | :--- |
-| **Mover para Esquerda / Direita** | `A` / `D` | `Seta Esquerda` / `Seta Direita` | `D-Pad Esq/Dir` ou `Analógico Esquerdo (Eixo X)` | Aplica aceleração horizontal contínua no eixo $X$. |
-| **Agachar / Inclinar** | `S` | `Seta Baixo` | `D-Pad Baixo` ou `Analógico Esquerdo (Eixo Y < 0)` | Reduz altura do colisor pela metade; permite tiro rasteiro. |
-| **Mirar para Cima** | `W` | `Seta Cima` | `D-Pad Cima` ou `Analógico Esquerdo (Eixo Y > 0)` | Trava ângulo de disparo em 90° para cima. |
-| **Pular / Salto Duplo** | `Espaço` | `Z` ou `K` | `Botão A` | Executa impulso vertical; ativa micro-jetpack no ar. |
-| **Atirar (Disparo)** | `J` ou `Botão Esquerdo Mouse` | `X` | `Botão X` ou `Gatilho Direito (RT)` | Dispara projéteis contínuos na direção em que o robô está virado/mirando. |
-| **Dash / Impulso de Chassi** | `K` ou `Shift Esquerdo` | `C` | `Botão B` ou `Botão RB` | Deslocamento horizontal instantâneo com invulnerabilidade temporária. |
-| **Travar Mira (Lock Aim)** | `Shift Direito` ou `Ctrl` | `L` | `Gatilho Esquerdo (LT)` | Mantém o robô fixo no lugar enquanto gira a mira em 8 eixos. |
-| **Trocar Arma** | `Q` ou `E` | `U` / `I` | `Botão Y` ou `Botão LB` | Alterna entre Rebitadeira (Spread) e Parafusadeira (Lança-Rápido). |
-| **Pausar Jogo** | `ESC` | `P` | `Botão Menu / Start` | Congela a simulação de física e abre o menu de opções. |
+O jogo oferece mapeamentos independentes para partidas locais ou pela rede LAN:
 
----
-
-### 4.2 Habilidades do Personagem
-
-1. **Locomoção Bípede de Alta Precisão:**
-   - Movimentação terrestre ágil com curva de aceleração quase imediata e desaceleração por atrito calibrada para evitar sensação de "escorregar no gelo".
-2. **Pulo Dinâmico com Corte de Altura (*Variable Jump Height*):**
-   - A altura máxima do salto varia de acordo com o tempo em que a tecla de pulo é mantida pressionada. Soltar a tecla prematuramente corta a velocidade vertical pela metade, oferecendo controle milimétrico para passar sob serras e canos quentes.
-3. **Segundo Salto (Micro-Jetpack de CO₂):**
-   - Permite um segundo impulso vertical menor durante a trajetória aérea. O jetpack emite fumaça branca e faíscas que causam pequeno dano de contato a inimigos logo abaixo.
-4. **Dash de Fricção Metálica com Quadros de Invulnerabilidade (*i-Frames*):**
-   - Impulso de alta velocidade horizontal (distância fixa de 4 blocos de tile) que dura 0.22 segundos. Durante os primeiros 12 frames (0.20s), o colisor de dano de Scrappy é desativado, permitindo atravessar projéteis e inimigos sem sofrer dano. Possui cooldown de recarga de 0.6 segundos.
-5. **Disparo em 8 Eixos Angulares:**
-   - O jogador pode apontar e disparar horizontalmente, verticalmente ou em diagonais de 45° (tanto no solo quanto no ar).
-6. **Agachamento com Disparo Rasteiro:**
-   - Permite desviar de projéteis de altura média enquanto continua atacando as pernas dos robôs inimigos.
+| Ação do Jogo | Jogador 1 (Scrappy) - Teclado | Jogador 2 (Byte) - Teclado Secundário | Gamepad XInput |
+| :--- | :--- | :--- | :--- |
+| **Mover Esquerda / Direita** | `A` / `D` | `Seta Esquerda` / `Seta Direita` | `Analógico Esquerdo (X)` ou `D-Pad` |
+| **Agachar** | `S` | `Seta Baixo` | `Analógico Esquerdo (Y < 0)` |
+| **Mirar para Cima** | `W` | `Seta Cima` | `Analógico Esquerdo (Y > 0)` |
+| **Pular / Salto Duplo** | `Espaço` | `Numpad 0` ou `Keypad Ins` | `Botão A` |
+| **Atirar (Disparo)** | `J` ou `Clique Esquerdo Mouse` | `Numpad 1` ou `End` | `Botão X` ou `Gatilho Direito (RT)` |
+| **Dash de Esquiva** | `K` ou `Shift Esquerdo` | `Numpad 2` ou `Down` | `Botão B` ou `Botão RB` |
+| **Trocar Arma** | `Q` ou `E` | `Numpad 3` / `PageDown` | `Botão Y` ou `Botão LB` |
+| **Pausar Jogo** | `ESC` | `P` | `Botão Start / Menu` |
 
 ---
 
-### 4.3 Fórmulas Matemáticas e Físicas
+### 4.2 Habilidades dos Protagonistas (Scrappy e Byte)
 
-Para garantir determinação, fluidez e reproducibilidade, a física do jogo opera sob o paradigma de **Integração de Euler Semi-Implícita** (*Verlet-like Euler*), executada em um **Fixed Timestep** invariável de $\Delta t = \frac{1}{60} \text{ s} \approx 0{,}01667 \text{ s}$.
-
-#### A. Modelo Base de Integração
-$$\vec{v}(t + \Delta t) = \vec{v}(t) + \vec{a}(t) \cdot \Delta t$$
-$$\vec{x}(t + \Delta t) = \vec{x}(t) + \vec{v}(t + \Delta t) \cdot \Delta t$$
-
-#### B. Dinâmica de Movimentação Horizontal
-Seja $u_x \in \{-1, 0, 1\}$ o comando direcional do jogador:
-
-1. **Aceleração Ativa ($u_x \neq 0$):**
-   $$a_x = u_x \cdot a_{run}$$
-   $$v_x(t + \Delta t) = \text{clamp}\left(v_x(t) + a_x \cdot \Delta t, -v_{max}, +v_{max}\right)$$
-   Onde $a_{run} = 1200 \text{ px/s}^2$ e $v_{max} = 240 \text{ px/s}$.
-
-2. **Desaceleração por Atrito ($u_x = 0$):**
-   Quando nenhuma tecla direcional está pressionada, aplica-se atrito linear:
-   $$v_x(t + \Delta t) = \text{sgn}(v_x(t)) \cdot \max\left(0, |v_x(t)| - \mu \cdot \Delta t\right)$$
-   Onde o coeficiente de atrito é diferenciado entre solo e ar:
-   $$\mu = \begin{cases} \mu_{ground} = 1600 \text{ px/s}^2, & \text{se o robô está no chão} \\ \mu_{air} = 400 \text{ px/s}^2, & \text{se o robô está no ar (preserva inércia aérea)} \end{cases}$$
-
-#### C. Dinâmica de Pulo e Gravidade Assimétrica
-Para obter o "game feel" característico de clássicos como *Cuphead* e *Mega Man*, a gravidade e o pulo são derivados da altura do pulo desejada ($h = 96 \text{ px}$, equivalente a 3 tiles de 32px) e do tempo até atingir o ápice ($t_{apex} = 0{,}32 \text{ s}$):
-
-1. **Gravidade Base ($g_{base}$):**
-   $$g_{base} = \frac{2 \cdot h}{t_{apex}^2} = \frac{2 \cdot 96}{(0{,}32)^2} = \frac{192}{0{,}1024} = 1875 \text{ px/s}^2$$
-
-2. **Velocidade Inicial do Salto ($v_{jump}$):**
-   $$v_{jump} = - \sqrt{2 \cdot g_{base} \cdot h} = - \frac{2 \cdot h}{t_{apex}} = - \frac{192}{0{,}32} = -600 \text{ px/s}$$
-   *(O sinal negativo indica o sentido ascendente no sistema de coordenadas 2D onde o eixo Y cresce para baixo).*
-
-3. **Corte de Pulo (*Jump Cut*):**
-   Se o jogador soltar a tecla de pulo enquanto o robô ainda está em ascensão ($v_y < 0$):
-   $$v_y(t) \leftarrow v_y(t) \cdot \alpha_{cut}, \quad \text{onde } \alpha_{cut} = 0{,}40$$
-   Isso cancela 60% do impulso remanescente, permitindo saltos baixos precisos de até 1 tile de altura.
-
-4. **Gravidade Efetiva Assimétrica (*Fall Multiplier*):**
-   Para evitar a sensação de "flutuação" na descida, a gravidade é escalonada conforme o estado do salto:
-   $$g_{eff} = \begin{cases} g_{base} \cdot k_{fall}, & \text{se } v_y > 0 \text{ (caindo, com } k_{fall} = 1{,}80 \implies g_{eff} = 3375 \text{ px/s}^2) \\ g_{base} \cdot k_{low}, & \text{se } v_y < 0 \text{ e a tecla de pulo foi solta (com } k_{low} = 1{,}50) \\ g_{base}, & \text{se } v_y < 0 \text{ e a tecla de pulo permanece pressionada} \end{cases}$$
-
-5. **Velocidade Máxima de Queda (Terminal Velocity):**
-   $$v_y(t + \Delta t) = \min\left(v_y(t) + g_{eff} \cdot \Delta t, \ v_{term\_fall}\right), \quad \text{onde } v_{term\_fall} = 750 \text{ px/s}$$
-
-6. **Tolerâncias de Usabilidade:**
-   - *Coyote Time:* Se o jogador sair de uma borda sem pular, um cronômetro de $t_{coyote} = 0{,}10 \text{ s}$ (6 frames) permite registrar o pulo mesmo sem apoio sob os pés.
-   - *Jump Buffer:* Se a tecla de pulo for pressionada até $t_{buffer} = 0{,}12 \text{ s}$ antes de tocar o solo, o pulo é executado imediatamente no instante da aterrissagem.
-
-#### D. Dinâmica do Dash
-Durante o estado de Dash:
-$$v_x(t) = \text{facing\_dir} \cdot v_{dash}, \quad \text{onde } v_{dash} = 650 \text{ px/s}$$
-$$v_y(t) = 0 \quad (\text{gravidade anulada temporariamente})$$
-O dash dura $\tau_{dash} = 0{,}22 \text{ s}$, percorrendo uma distância total de:
-$$d_{dash} = v_{dash} \cdot \tau_{dash} = 650 \cdot 0{,}22 = 143 \text{ px} \approx 4{,}46 \text{ tiles}$$
-
-#### E. Balística de Projéteis e Recuo (*Knockback*)
-Cada projétil disparado segue vetor de velocidade constante:
-$$\vec{P}_{bullet}(t + \Delta t) = \vec{P}_{bullet}(t) + \vec{v}_{proj} \cdot \Delta t$$
-Onde $\vec{v}_{proj} = \|\vec{v}_{proj}\| \cdot \hat{d}_{aim}$, com $\|\vec{v}_{proj}\| = 800 \text{ px/s}$.
-
-Pelo princípio da conservação de momento, o disparo de projéteis pesados gera um micro-recuo (*knockback*) no robô:
-$$v_x^{player} \leftarrow v_x^{player} - \hat{d}_{aim\_x} \cdot \left( \frac{m_{bullet} \cdot v_{proj}}{m_{player}} \right)$$
-Onde $m_{bullet} = 0{,}15 \text{ kg}$, $m_{player} = 35 \text{ kg}$, resultando em impulso reverso instantâneo de $\approx 3{,}4 \text{ px/s}$ por disparo, perceptível na cadência contínua de tiro.
+1. **Locomoção Terrestre:** Aceleração imediata calibrada com atrito de frenagem no chão, evitando deslizamento indevido.
+2. **Pulo com Altura Variável:** A velocidade ascendente é atenuada instantaneamente em 60% caso a tecla de pulo seja solta precocemente (*Jump Cut*).
+3. **Salto Duplo a Propulsão:** Segundo impulso no ar que consome pequena cota de pressão e libera fumaça ionizada.
+4. **Dash com Invulnerabilidade (*i-Frames*):** Deslocamento rápido horizontal de 4 blocos de distância (duração de 0.22s) concedendo 12 frames sem sofrer dano.
+5. **Disparo Multidirecional em 8 Eixos:** O canhão frontal ajusta a trajetória do tiro para horizontais, verticais e diagonais de 45°.
+6. **Suporte Mútuo Cooperativo (Multiplayer LAN):** Quando um dos robôs perde toda a energia (HP = 0), ele entra em estado de sobrecarga temporária ("Curto-Circuito"), podendo ser reativado se o parceiro se aproximar e pressionar o botão de interação por 2 segundos.
 
 ---
 
-### 4.4 Detecção e Resolução de Colisões (AABB)
+### 4.3 Parâmetros Físicos e Comportamento Mecânico
 
-As caixas delimitadoras (*Axis-Aligned Bounding Boxes*) de todas as entidades são modeladas como retângulos no espaço $\mathbb{R}^2$, definidos por:
-$$\text{Box} = \left[ x_{min}, x_{max} \right] \times \left[ y_{min}, y_{max} \right]$$
-Onde $x_{min} = \text{pos}_x - \frac{w}{2}$, $x_{max} = \text{pos}_x + \frac{w}{2}$, $y_{min} = \text{pos}_y - h$, $y_{max} = \text{pos}_y$.
+O motor de jogo opera sob um passo de tempo fixo de **60 quadros por segundo (Fixed Timestep de 16,6 milissegundos por quadro)**, assegurando que o comportamento de corrida, pulo, atrito e colisão permaneça perfeitamente estável e idêntico em qualquer computador, independente da taxa de atualização do monitor.
 
-#### Critério Booleano de Interseção:
-$$\text{Colisão}(A, B) \iff (A.x_{min} < B.x_{max}) \land (A.x_{max} > B.x_{min}) \land (A.y_{min} < B.y_{max}) \land (A.y_{max} > B.y_{min})$$
+| Parâmetro de Física | Valor Calibrado | Comportamento Prático no Jogo |
+| :--- | :--- | :--- |
+| **Taxa de Simulação** | 60 Hz (16,6 ms/frame) | Física determinística invariável; sem variações de velocidade causadas por oscilação de quadros. |
+| **Velocidade Máxima de Corrida** | 240 pixels/segundo | Velocidade horizontal ágil que permite boa leitura de cenário e reação rápida aos disparos. |
+| **Aceleração de Corrida** | 1200 pixels/segundo² | Resposta quase imediata aos comandos do teclado e analógico, alcançando velocidade máxima em 0,2s. |
+| **Atrito no Solo (Frenagem)** | 1600 pixels/segundo² | Frenagem firme ao soltar a tecla; evita a sensação de deslizamento indevido no chão. |
+| **Preservação de Inércia no Ar** | 400 pixels/segundo² | Resistência reduzida no ar, permitindo ao jogador ajustar levemente a trajetória enquanto salta. |
+| **Altura Máxima de Salto** | 96 pixels (3 blocos) | Alcance vertical exato para subir em plataformas elevadas e saltar sobre esteiras industriais. |
+| **Tempo de Subida do Salto** | 0,32 segundos | Tempo rápido até atingir a altura máxima, conferindo dinamismo arcade ao personagem. |
+| **Impulso Vertical Inicial** | 600 pixels/segundo | Força vertical aplicada instantaneamente ao acionar o pulo do robô. |
+| **Corte de Salto (Jump Cut)** | Corte de 60% da velocidade | Ao soltar a tecla de pulo antes do ápice, a subida é atenuada, permitindo pulos baixos precisos sob serras. |
+| **Gravidade Assimétrica** | Queda 1,8x mais rápida | Aceleração aumentada na descida, eliminando a sensação de personagem flutuando no ar. |
+| **Velocidade Terminal de Queda** | 750 pixels/segundo | Limite máximo de velocidade na descida para evitar atravessar blocos sólidos do chão. |
+| **Coyote Time** | 0,10 segundos (6 frames) | Tolerância generosa que permite pular mesmo fração de segundo após sair da borda de uma plataforma. |
+| **Buffer de Pulo** | 0,12 segundos (7 frames) | Armazena a intenção de pulo antes de tocar o solo e dispara o salto imediatamente ao aterrissar. |
+| **Dash de Esquiva** | 650 pixels/s (durante 0,22s) | Impulso rápido horizontal de 143 pixels (4,5 blocos) com gravidade suspensa durante o trajeto. |
+| **Invulnerabilidade no Dash** | 12 frames (i-frames) | Durante o impulso, o robô não sofre dano de contato com tiros ou robôs inimigos. |
+| **Velocidade dos Projéteis** | 800 pixels/segundo | Tiros velozes em linha reta nas 8 direções angulares suportadas. |
+| **Recuo da Rebitadeira** | ~3,4 pixels/s por disparo | Micro-impulso reverso no robô a cada tiro, conferindo peso e impacto sonoplástico às armas. |
 
-#### Resolução com Vetor de Translação Mínima (MTV):
-Para resolver colisões entre o personagem e tiles sólidos de terreno:
-1. Calcula-se a penetração nos dois eixos:
-   $$\text{pen}_x = \min(A.x_{max} - B.x_{min}, \ B.x_{max} - A.x_{min})$$
-   $$\text{pen}_y = \min(A.y_{max} - B.y_{min}, \ B.y_{max} - A.y_{min})$$
-2. Se $\text{pen}_x < \text{pen}_y$:
-   A colisão é lateral (parede). Corrige-se a posição $x$ pelo menor deslocamento:
-   $$x_{player} \leftarrow x_{player} \pm \text{pen}_x, \quad v_x \leftarrow 0$$
-3. Se $\text{pen}_y \le \text{pen}_x$:
-   A colisão é vertical (teto ou chão).
-   - Se a correção for para cima: $y_{player} \leftarrow y_{player} - \text{pen}_y$, $v_y \leftarrow 0$, `is_grounded = true`.
-   - Se a correção for para baixo: $y_{player} \leftarrow y_{player} + \text{pen}_y$, $v_y \leftarrow 0$ (bateu a cabeça no teto).
+---
 
-#### Detecção Híbrida: Fase Ampla (AABB) e Fase Estreita (Máscara de Bits / Pixel-Perfect)
-Para conciliar alta performance computacional (60 FPS contínuos) com fidelidade cirúrgica nos combates:
-1. **Fase Ampla (*Broad-phase*):** O motor realiza testes geométricos preliminares via AABB entre todos os atores e os tiles do mapa de blocos sólidos;
-2. **Fase Estreita (*Narrow-phase*):** Havendo sobreposição prévia de caixas delimitadoras entre entidades dinâmicas (ex.: Projétil da Rebitadeira versus a hélice rotativa do Drone Parafuso), o sistema aciona verificação por Máscara de Bits (*Bitmask Overlap* — padrão `pygame.mask.from_surface`). Calcula-se o vetor de deslocamento relativo $\vec{\delta} = \vec{P}_{inimigo} - \vec{P}_{proj}$ e executa-se a operação booleana binária $\text{mask}_1 \text{ AND } \text{mask}_2$. Se houver ao menos um pixel opaco coincidente, confirma-se o dano, eliminando penalidades injustas por caixas transparentes vazias.
+### 4.4 Detecção e Resolução de Colisões
+
+O gerenciamento de colisões combina duas técnicas consagradas para equilibrar alto desempenho com precisão cirúrgica nos combates:
+
+- **Fase Ampla (AABB - Caixas Delimitadoras):** Todas as entidades e blocos de cenário possuem retângulos delimitadores alinhados aos eixos cartesianos. O motor verifica se há sobreposição entre as bordas das caixas de forma ultrarrápida.
+- **Resolução de Penetração (MTV - Vetor de Translação Mínima):** Ao identificar sobreposição entre o robô e um bloco sólido, calcula-se o menor deslocamento necessário nos eixos X e Y:
+  - Se a sobreposição horizontal for menor, afasta-se o robô para o lado e zera-se a velocidade horizontal (colisão com parede).
+  - Se a sobreposição vertical for menor, corrige-se para cima apoiando o robô no piso (ativando o estado de chão) ou para baixo caso bata a cabeça no teto.
+- **Fase Estreita (Máscaras de Bits / Pixel-Perfect):** Para o combate de projéteis contra inimigos de silhueta recortada (como a hélice rotativa do Drone Parafuso ou as chamas do Soldador), o Pygame analisa a sobreposição real de pixels opacos, eliminando áreas transparentes vazias e evitando danos injustos.
 
 ---
 
 ## 5. ASSETS AUDIOVISUAIS E CENÁRIO INICIAL
 
 ### 5.1 Estilo Visual e Direção de Arte
-- **Estilo:** Pixel Art 16-bit com traço expressivo inspirado na era Neo-Geo (*Metal Slug*) e animação de personagens com princípios clássicos da animação tradicional (*Squash and Stretch*, antecipação e exagero mecânico cômico estilo *Cuphead*).
-- **Resolução Nativa de Renderização:** $480 \times 270$ pixels (proporção 16:9 widescreen), escalonada para Full HD ($1920 \times 1080$) através de *Integer Scaling* com filtro *Nearest Neighbor*, mantendo pixels nítidos sem borrão bilinear.
-- **Paleta de Cores:** Paleta curada de 48 cores temáticas:
-  - *Tons de Ferrugem e Sucata:* Castanhos ocres, bronze oxidado (#8B4513, #CD853F, #4A2E18);
-  - *Tons de Alerta e Eletricidade:* Amarelo industrial (#FFD700), Laranja faísca (#FF4500) e Azul elétrico (#00E5FF);
-  - *Tons de Fundo:* Roxos e cinzas escuros dessaturados (#1E1B2E, #2A2A38, #121218).
+- **Resolução Nativa:** 480x270 pixels escalonada via *Nearest Neighbor* para Full HD (1920x1080).
+- **Estética:** Pixel art 16-bit com atmosfera industrial dieselpunk/steampunk retro.
+- **Paleta de Cores:** 48 tonalidades selecionadas destacando ferrugem (#8B4513), cobre oxidado (#CD853F), amarelo-alerta (#FFD700) e azul elétrico de plasma (#00E5FF).
 
----
-
-### 5.2 Sprites do Personagem Principal (Scrappy - B-09)
-Dimensões da Hitbox: $20 \times 28$ pixels | Dimensões do Canvas do Sprite: $32 \times 32$ pixels.
-
-| Animação | Qtd. Frames | FPS | Descrição e Ação |
-| :--- | :---: | :---: | :--- |
-| `scrappy_idle` | 4 | 6 | Movimento de respiração mecânica; a válvula de escape solta pequenos vapores no topo da cabeça. |
-| `scrappy_run` | 8 | 12 | Corrida rápida com perninhas mecânicas girando e inclinação frontal do chassi. |
-| `scrappy_jump_rise` | 3 | 12 | Chassi se estica para cima; pernas recolhidas; saída de faísca nas solas. |
-| `scrappy_jump_fall` | 2 | 8 | Chassi achatado horizontalmente; olhos arregalados para baixo acompanhando a queda. |
-| `scrappy_double_jump` | 4 | 14 | O mini-extintor de CO₂ dispara uma nuvem branca para baixo com propulsão. |
-| `scrappy_shoot_straight` | 4 | 16 | Rebitadeira apontada para frente com clarão luminoso no cano (*muzzle flash*) e ejeção de cápsulas. |
-| `scrappy_shoot_diagonal` | 4 | 16 | Rebitadeira apontada a 45°; corpo se adapta ao ângulo de tiro. |
-| `scrappy_shoot_up` | 4 | 16 | Cabeça e braço levantados a 90° mirando para cima. |
-| `scrappy_crouch_shoot` | 3 | 12 | Scrappy agachado (hitbox $20 \times 14$ px), disparando a 2 pixels do nível do solo. |
-| `scrappy_dash` | 4 | 18 | O robô se projeta horizontalmente deixando 3 imagens-fantasma (*afterimages*) azuis translúcidas. |
-| `scrappy_hurt` | 3 | 12 | Efeito de piscar vermelho-branco com expressão de dor e perda de pequenos parafusos. |
-| `scrappy_death` | 8 | 10 | Desintegração cômica: a cabeça voa como uma mola enquanto engrenagens e parafusos saltam pelo ar. |
-
----
+### 5.2 Sprites dos Protagonistas (Scrappy e Byte)
+- **Scrappy (P1):** Robô azul-aço com cabeça em domo de vidro e visor esmeralda.
+- **Byte (P2):** Robô bronze/cobre com chassi angular e visor âmbar vibrante.
+- Animações completas (32x32 pixels): `idle` (4 frames), `run` (8 frames), `jump_rise` (3 frames), `jump_fall` (2 frames), `shoot` (4 frames), `dash` (4 frames com afterimages) e `defeat` (8 frames).
 
 ### 5.3 Sprites dos Inimigos
-
-#### A. Drone Parafuso (*Screw-Drone*)
-- **Papel:** Inimigo voador de patrulha ágil e assédio aéreo.
-- **Dimensões:** $24 \times 24$ pixels (Canvas: $32 \times 32$ px).
-- **Comportamento:** Voa em trajetória senoidal horizontal; ao avistar o jogador, para momentaneamente, gira sua ponta afiada e dispara uma esfera de energia amarela.
-- **Animações:**
-  - `drone_hover` (4 frames, 8 FPS): Hélice rotacionando no topo;
-  - `drone_charge` (3 frames, 12 FPS): Olho frontal pisca em vermelho-alerta;
-  - `drone_attack` (2 frames, 10 FPS): Disparo do projétil;
-  - `drone_explode` (5 frames, 14 FPS): Explosão em faíscas amarelas.
-
-#### B. Prensa Bípede (*Hydraulic Stomper*)
-- **Papel:** Inimigo terrestre blindado tipo tanque (*Mini-Boss* de setor).
-- **Dimensões:** $40 \times 44$ pixels (Canvas: $48 \times 48$ px).
-- **Comportamento:** Possui escudo frontal invulnerável a tiros frontais; caminha lentamente até o jogador e salta para esmagar com impacto no chão, gerando duas ondas de choque rasteiras que exigem pulo. O ponto fraco é o núcleo traseiro desprotegido.
-- **Animações:**
-  - `stomper_walk` (6 frames, 8 FPS): Passos pesados com leve tremor na tela (*screen shake*);
-  - `stomper_slam_prepare` (4 frames, 10 FPS): Eleva a prensa hidráulica gerando vapor;
-  - `stomper_slam_impact` (3 frames, 16 FPS): Esmaga o chão liberando fumaça;
-  - `stomper_stunned` (3 frames, 6 FPS): Fica atordoado por 2 segundos ao errar o golpe.
-
-#### C. Robô Soldador Sucateiro (*Welder-Bot*)
-- **Papel:** Inimigo de infantaria rápida.
-- **Dimensões:** $22 \times 30$ pixels (Canvas: $32 \times 32$ px).
-- **Comportamento:** Corre em direção ao jogador em plataformas fixas. Ao chegar a uma distância de 60 pixels, liga seu maçarico criando uma chama horizontal sustentada de 40 pixels por 1.5 segundo.
-- **Animações:**
-  - `welder_run` (6 frames, 10 FPS): Movimento acelerado com máscara de solda abaixada;
-  - `welder_flame_burst` (5 frames, 14 FPS): Jato de fogo alaranjado vibrante;
-  - `welder_death` (4 frames, 12 FPS): Tanque de gás perfurado voando em círculo.
-
----
+1. **Drone Parafuso (*Screw-Drone*):** Robô aéreo de patrulha com voo senoidal e disparo elétrico.
+2. **Prensa Bípede (*Hydraulic Stomper*):** Autômato pesado com escudo frontal imune a balas e impacto sísmico no solo.
+3. **Robô Soldador (*Welder-Bot*):** Inimigo de infantaria que avança rapidamente expelindo jato de maçarico.
 
 ### 5.4 Sprites de Itens e Coletáveis
-Todos os itens possuem tamanho de $16 \times 16$ pixels (Canvas: $16 \times 16$ px).
-
-| Item / Coletável | Sprite e Efeito Visual | Função no Jogo (Gameplay) |
-| :--- | :--- | :--- |
-| **Óleo Lubrificante Sintético** | Frasco de vidro vintage com óleo âmbar reluzente (4 frames de pulso). | Recupera **1 ponto de vida (HP)** de Scrappy (máximo de 3 HP). |
-| **Parafuso Dourado (Scrap Coin)** | Parafuso sextavado dourado rodando em pseudo-3D (6 frames de giro). | Concede **+100 pontos** de pontuação; a cada 50 parafusos, concede 1 vida extra. |
-| **Bateria de Plasma de Alta Voltagem** | Bateria cilíndrica com arcos voltaicos azuis cintilantes (4 frames). | Concede a **Arma Spread (Tiro Triplo)** temporária com 40 projéteis. |
-| **Engrenagem Relíquia (Lore Disk)** | Disco de disquete magnético antigo cintilando em arco-íris (4 frames). | Colecionável secreto da fase; libera galeria de arte conceitual no menu. |
-
----
+- **Frasco de Óleo Sintético:** Restaura 1 ponto de vida (HP).
+- **Parafuso de Ouro (Scrap):** +100 pontos no placar; 50 parafusos concedem 1 vida extra.
+- **Bateria de Alta Tensão:** Concede temporariamente a arma *Spread Shot* (Tiro Triplo).
+- **Disco Magnético Antigo (Lore Disk):** Coletável colecionável secreto da fase.
 
 ### 5.5 Cenário Inicial: "Setor 01 – As Esteiras Infernais"
-
-#### Ambientação
-O primeiro nível se passa no setor de triagem primária da usina. O chão é composto por esteiras industriais motorizadas, pilhas de carcaças de eletrodomésticos antigos e caldeiras verticais soltando jatos intermitentes de vapor.
-
-#### Sistema de Parallax (4 Camadas de Profundidade)
-1. **Camada 0 (Fundo Distante - Scroll Factor $0{,}10\times$):**
-   Céu avermelhado de poluição industrial com silhuetas recortadas de mega-chaminés e a gigantesca silhueta piramidal da Torre da Compactadora-Mor ao longe.
-2. **Camada 1 (Fundo Médio - Scroll Factor $0{,}30\times$):**
-   Tubulações cilíndricas gigantescas transportando lava metálica e esteiras aéreas suspensas com braços robóticos operando em loop.
-3. **Camada 2 (Fundo Próximo - Scroll Factor $0{,}60\times$):**
-   Vigas de sustentação de ferro enferrujado com rebites destacados, plataformas de observação com monitores CRT exibindo o símbolo de alerta da IA.
-4. **Camada 3 (Playfield / Primeiro Plano - Scroll Factor $1{,}00\times$):**
-   Tiles colidíveis de aço antiderrapante, blocos de lixo compactado destrutíveis e esteiras ativas que adicionam um vetor de velocidade constante $\vec{v}_{belt} = (\pm 60, 0) \text{ px/s}$ à física do jogador quando em contato.
-
-#### Armadilhas de Cenário
-- **Esteiras Inversoras:** Forçam o jogador a lutar contra a correnteza ou aceleram sua corrida em direção a armadilhas.
-- **Prensas Trituradoras de Teto:** Pistões industriais que caem com violência a cada 2.5 segundos; exigem temporização precisa de travessia com o Dash.
-- **Fossos de Sucata Incandescente:** Piscinas de metal fundido com colisão fatal instantânea (*insta-death*).
-
----
+- Parallax com 4 planos de profundidade (Céu poluto, Usina de incineração, Vigas de suporte, Terreno ativo).
+- Elementos interativos: Esteiras transportadoras que deslocam os robôs (velocidade constante de 60 px/s em ambas as direções), prensas mecânicas com ciclo de descida periódica e poços incandescentes.
 
 ### 5.6 Design de Áudio (SFX e BGM)
-
-#### A. Tabela de Efeitos Sonoros (SFX)
-| ID do Som | Evento de Jogo | Características Acústicas / Síntese | Ferramenta Recomendada |
-| :--- | :--- | :--- | :--- |
-| `sfx_laser_pew` | Disparo da Rebitadeira | Onda quadrada com modulação descendente rápida de frequência (800 Hz $\to$ 150 Hz em 60 ms). | Bfxr / Chiptone |
-| `sfx_jump_spring` | Pulo Bípede | Onda senoidal com subida rápida (*pitch bend* ascendente 200 Hz $\to$ 520 Hz) com ressonância metálica. | Bfxr |
-| `sfx_jetpack_burst` | Salto Duplo (Jetpack) | Ruído branco (*white noise*) filtrado com passa-faixa (*bandpass*) simulando escape de gás pressurizado. | Audacity |
-| `sfx_dash_whoosh` | Dash | Ruído rosa (*pink noise*) com envelope ADSR de ataque curtíssimo e decaimento estéreo estendido. | Audacity |
-| `sfx_enemy_hit` | Tiro atingindo inimigo | Som metálico agudo de impacto (*metallic clank*) em 1200 Hz com decaimento abrupto de 40 ms. | Bfxr |
-| `sfx_explosion_metal` | Inimigo destruído | Ruído branco de baixa frequência misturado com estalo metálico e cauda reverberada de 300 ms. | Bfxr / Audacity |
-| `sfx_item_pickup` | Coleta de Parafuso | Arpejo ultra-rápido de duas notas em onda triangular (Dó6 $\to$ Sol6) com brilho cristalino. | Chiptone |
-| `sfx_player_hurt` | Dano em Scrappy | Som de curto-circuito elétrico com modulação de amplitude em 30 Hz e ruído estridente. | Bfxr |
-| `sfx_stomper_impact` | Prensa bate no solo | Onda senoidal profunda (60 Hz sub-bass) combinada com impacto percussivo e leve estalo de placas. | Audacity |
-
-#### B. Trilha Sonora (BGM)
-- **Tema:** *"Scrapyard Swing & Solder"*
-- **Estilo:** **Electro-Swing Industrial / 16-bit Chiptune Rock**.
-- **Andamento:** 138 BPM enérgico com compasso 4/4 e ritmo sincopado.
-- **Instrumentação:**
-  - Baixo em onda de serra (*sawtooth bass*) pulsante e encorpado;
-  - Bateria acústica sampleada com caixa cortante combinada com percussões metálicas (sons de bigorna e engrenagens como chimbal);
-  - Melodia principal executada em dueto de sintetizador chiptune estilo Yamaha YM2612 (Mega Drive) com metais estilo Big Band (trompetes e saxofones com atitude cômica e acelerada).
+- SFX procedural sintetizado em memória (sem dependência de arquivos externos ausentes) para tiros, saltos, impactos e explosões.
+- Trilha musical em estilo *Electro-Swing Industrial / 16-bit Chiptune Rock* a 138 BPM.
 
 ---
 
 ## 6. FERRAMENTAS DE SUPORTE AO DESENVOLVIMENTO
 
-Para viabilizar a criação de todos os assets gráficos, sonoros e estruturais com alto padrão de qualidade e custo zero de licenciamento, selecionou-se o seguinte conjunto de ferramentas especializadas:
-
-### 6.1 Criação e Manipulação de Arte Visual
-1. **Aseprite (ou LibreSprite / Pixelorama):**
-   - *Finalidade:* Criação de sprites, folhas de sprites (*spritesheets*), paletas indexadas e animação quadro a quadro.
-   - *Recursos Chave:* Suporte a camadas, tags de animação nomeadas (`idle`, `run`, `dash`), onion skinning (casca de cebola para verificar continuidade do movimento) e exportação automatizada para `.png` acompanhado de descritor `.json`.
-2. **Tiled Map Editor:**
-   - *Finalidade:* Construção modular dos níveis e posicionamento de elementos de cenário.
-   - *Recursos Chave:* Criação de camadas ortogonais de tilesets, definição de camadas de colisão por propriedades personalizadas (`solid = true`, `hazard = true`), posicionamento de objetos de spawn de inimigos e exportação em formato padronizado JSON/XML.
-
-### 6.2 Criação e Manipulação de Sons
-1. **Bfxr / Chiptone:**
-   - *Finalidade:* Síntese procedural de efeitos sonoros retro (tiros, saltos, impactos, explosões e pickups).
-   - *Recursos Chave:* Algoritmos clássicos de geração sonora procedural baseados em sintetizadores virtuais com controle granular sobre envelopes de ataque, sustentação, decaimento, vibrato e modulação de frequência. Exportação direta em WAV 44.1 kHz / 16-bit.
-2. **Audacity:**
-   - *Finalidade:* Gravação, corte, masterização, normalização de ganho e redução de ruído dos efeitos sonoros e músicas.
-   - *Recursos Chave:* Edição multipista, aplicação de curvas de equalização (corte de frequências sub-graves desnecessárias em sprites sonoros), conversão de taxas de amostragem e exportação em formato comprimido de alta performance **OGG Vorbis** (ideal para streaming de BGM em jogos sem gargalo de memória).
-3. **Bosca Ceoil / FL Studio:**
-   - *Finalidade:* Composição e arranjo das faixas musicais do jogo com instrumentos virtuais e baterias industriais.
-
-### 6.3 Ferramentas de Engenharia de Software e Versionamento
-- **Visual Studio Code / Visual Studio Community:** Ambiente de desenvolvimento integrado com depurador interativo, coloração de sintaxe e linting.
-- **Git & GitHub:** Controle de versão distribuído para rastreamento de branches de mecânicas, assets e releases executáveis.
+1. **Python 3.10+ & Pygame-CE / Pygame:** Motor de jogo, física, renderização 2D e controle de eventos.
+2. **NumPy:** Matrizes compactas e serialização de dados de fase comprimidos (`.npz`).
+3. **Módulo Socket nativo:** Comunicação de rede em tempo real sobre sockets UDP (`AF_INET`, `SOCK_DGRAM`).
+4. **Módulo Threading nativo:** Threads de recepção assíncrona de rede com primitivas de sincronização (`Lock`).
+5. **Aseprite & Tiled:** Ferramentas de autoria de spritesheets e mapas conceituais.
+6. **Audacity & Bfxr:** Criação e sintetização de áudio e sonoplastia retro.
 
 ---
 
@@ -379,160 +240,465 @@ Para viabilizar a criação de todos os assets gráficos, sonoros e estruturais 
 
 ### 7.1 Requisitos Funcionais (RF)
 
-| ID | Descrição Funcional | Prioridade (MoSCoW) |
-| :---: | :--- | :---: |
-| **RF01** | O sistema deve processar a movimentação horizontal contínua do jogador através de comandos de teclado e gamepad, aplicando aceleração e atrito. | **Must Have** |
-| **RF02** | O sistema deve permitir o pulo com altura variável conforme a duração do pressionamento da tecla, além de suporte a pulo duplo com micro-jetpack. | **Must Have** |
-| **RF03** | O sistema deve implementar o dash horizontal com anulação temporária de gravidade e concessão de 12 frames de invulnerabilidade (i-frames). | **Must Have** |
-| **RF04** | O sistema deve permitir que o jogador atire projéteis contínuos em 8 direções angulares, tanto no solo quanto no ar ou agachado. | **Must Have** |
-| **RF05** | O sistema deve gerenciar alternância entre armas coletadas (Rebitadeira Padrão e Disparo Triplo Spread) através de tecla dedicada. | **Should Have** |
-| **RF06** | O sistema deve controlar a quantidade de pontos de vida (HP) de Scrappy (3 pontos), processando dano, período de invulnerabilidade e morte. | **Must Have** |
-| **RF07** | O sistema deve controlar a IA e as máquinas de estado dos inimigos (Drone Parafuso, Prensa Bípede e Robô Soldador), alternando entre Patrulha, Ataque e Morte. | **Must Have** |
-| **RF08** | O sistema deve detectar colisão projétil-inimigo, reduzindo o HP do inimigo e instanciando efeitos visuais de faísca e som de impacto. | **Must Have** |
-| **RF09** | O sistema deve instanciar itens coletáveis (Óleo, Parafusos, Baterias) no cenário e permitir sua coleta por colisão com o jogador. | **Must Have** |
-| **RF10** | O sistema deve gerenciar obstáculos do cenário, incluindo plataformas sólidas, esteiras que adicionam velocidade e serras com dano instantâneo. | **Must Have** |
-| **RF11** | O sistema deve implementar uma câmera 2D com interpolação suave (*Smooth Damp/Lerp*), zona morta central e deslocamento antecipado (*Look-Ahead*). | **Must Have** |
-| **RF12** | O sistema deve exibir uma interface de usuário (HUD) fixa contendo a barra de integridade (HP), ícone da arma atual, munição e pontuação. | **Must Have** |
-| **RF13** | O sistema deve calcular a pontuação acumulada por inimigos destruídos e parafusos coletados, exibindo tela de Game Over / Vitória. | **Should Have** |
-| **RF14** | O sistema deve permitir pausar a execução da simulação a qualquer momento, apresentando menu com opções de Continuar, Reiniciar ou Sair. | **Should Have** |
-| **RF15** | O sistema deve executar música de fundo em loop contínuo e disparar efeitos sonoros com controle independente de volume master. | **Should Have** |
-
----
+| ID | Descrição Funcional | Categoria | Prioridade |
+| :---: | :--- | :---: | :---: |
+| **RF01** | Processar movimentação horizontal com aceleração e atrito para os jogadores. | Física/Controle | **Must Have** |
+| **RF02** | Executar pulo dinâmico com corte de altura e pulo duplo via micro-jetpack. | Física/Controle | **Must Have** |
+| **RF03** | Executar dash horizontal temporizado com concessão de i-frames. | Física/Controle | **Must Have** |
+| **RF04** | Disparar projéteis em 8 direções e alternar entre armas coletadas. | Combate | **Must Have** |
+| **RF05** | Detectar colisões (AABB e máscara de bits) entre projéteis, entidades e terreno. | Colisão | **Must Have** |
+| **RF06** | Controlar comportamento e IA dos inimigos (Drones, Prensas e Soldadores). | IA/Inimigos | **Must Have** |
+| **RF07** | Exibir HUD com barras de integridade, munição e pontuação dos jogadores. | Interface | **Must Have** |
+| **RF08** | **Disponibilizar Editor de Fases interativo com grade matricial de tiles.** | **Level Maker** | **Must Have** |
+| **RF09** | **Permitir posicionar e remover tiles, inimigos e itens usando o mouse no Editor.** | **Level Maker** | **Must Have** |
+| **RF10** | **Salvar e carregar mapas personalizados em formato comprimido (.npz / JSON).** | **Level Maker** | **Must Have** |
+| **RF11** | **Oferecer modo de teste imediato (Playtest) da fase dentro do próprio Editor.** | **Level Maker** | **Must Have** |
+| **RF12** | **Implementar servidor local em LAN sobre protocolo UDP para hospedar partidas.** | **Multiplayer** | **Must Have** |
+| **RF13** | **Permitir conexão de cliente ao servidor em LAN informando endereço IP e porta.** | **Multiplayer** | **Must Have** |
+| **RF14** | **Sincronizar posições, estados e disparos entre jogadores com LERP e timeout.** | **Multiplayer** | **Must Have** |
+| **RF15** | **Implementar Menu Principal completo (Novo Jogo, Multiplayer, Editor, Opções, Sair).** | **Menus** | **Must Have** |
+| **RF16** | **Implementar tela de Configurações para volumes de áudio, display e controles.** | **Menus** | **Should Have** |
+| **RF17** | **Implementar Menu de Pausa e telas de Game Over e Vitória com opção de reinício.** | **Menus** | **Must Have** |
 
 ### 7.2 Requisitos Não Funcionais (RNF)
 
 | ID | Categoria | Descrição do Requisito Não Funcional | Critério de Aceitação / Métrica |
 | :---: | :--- | :--- | :--- |
-| **RNF01** | **Desempenho** | A taxa de quadros (*framerate*) deve ser estável e travada em 60 quadros por segundo. | Mínimo de 58 FPS em hardware equivalente à especificação mínima. |
-| **RNF02** | **Latência de Entrada** | O atraso entre a ativação de uma tecla e o primeiro frame de resposta na tela deve ser mínimo. | Latência de input $< 16{,}6 \text{ ms}$ (atraso máximo de 1 frame). |
-| **RNF03** | **Uso de Memória** | O consumo total de memória RAM do processo não deve exceder os limites de computadores básicos. | Uso de memória RAM $\le 250 \text{ MB}$ durante a execução da fase. |
-| **RNF04** | **Compatibilidade** | O jogo deve executar de forma nativa e estável no ecossistema Microsoft Windows. | Compatibilidade homologada com Windows 10 e Windows 11 (x64). |
-| **RNF05** | **Arquitetura e Acoplamento** | O código-fonte deve ser organizado em módulos estritamente desacoplados por interfaces. | Módulo de física e entidades sem dependência direta de renderização OpenGL/DirectX. |
-| **RNF06** | **Tempo de Carregamento** | O tempo de carregamento inicial e de transição entre fases deve ser quase instantâneo. | Tempo de transição de cena $< 2{,}5 \text{ segundos}$. |
-| **RNF07** | **Padrão de Assets** | Todos os assets devem seguir padrões abertos e amplamente documentados da indústria. | Imagens em PNG-32 bit com canal alfa; áudios comprimidos em OGG Vorbis; dados em JSON. |
-| **RNF08** | **Robustez e Falhas** | O sistema deve tratar eventos de sistema operacional sem quebrar a execução (*crash*). | Perda de foco de janela pausa o jogo automaticamente; desconexão de gamepad não trava o loop. |
+| **RNF01** | **Desempenho** | Taxa de quadros de simulação e desenho constante em 60 FPS. | Oscilação inferior a 5% (mínimo de 58 FPS estáveis). |
+| **RNF02** | **Latência de Rede em LAN** | Tempo de propagação de pacotes de sincronismo em rede local mínimo. | RTT (*Round-Trip Time*) em LAN inferior a 30 ms. |
+| **RNF03** | **Tamanho de Datagrama** | Mensagens de sincronização compactas e leves sobre UDP. | Carga útil inferior a 128 bytes por pacote de telemetria. |
+| **RNF04** | **Thread Safety** | Recepção de dados em thread secundária sem concorrência destrutiva. | Acesso a dicionários e posições protegido por `threading.Lock`. |
+| **RNF05** | **Tempo de Carregamento** | Serialização e desserialização rápida de arquivos de fase. | Tempo de abertura e salvamento de mapa inferior a 200 ms. |
+| **RNF06** | **Modularidade e Padrões** | Código desacoplado e orientado a objetos com aplicação de padrões GoF. | Módulos independentes com interfaces e barramento de eventos. |
+| **RNF07** | **Resiliência a Desconexões** | Queda ou encerramento de um cliente não trava o servidor nem o jogo. | Timeout de 5s remove o jogador sem interrupção do loop central. |
 
 ---
 
-## 8. DIAGRAMA DE ESTRUTURA DO PROJETO EM MÓDULOS (PACOTES)
+## 8. PADRÕES DE PROJETO USADOS (DESIGN PATTERNS)
 
-O diagrama a seguir ilustra a arquitetura modular do projeto em camadas, evidenciando o baixo acoplamento entre os subsistemas de entrada, física, entidades, renderização, áudio e controle de cenas.
+Seguindo as boas práticas consolidadas da engenharia de software de jogos e os padrões didáticos demonstrados no repositório de referência (`tac3`), o projeto adota os seguintes padrões de projeto:
 
 ```mermaid
 graph TD
-    subgraph Client_App ["Aplicação Principal / EntryPoint"]
-        Main["Main / GameApplication"]
+    subgraph Architectural ["Padrões Arquiteturais"]
+        ClientServer["Client-Server & Thread Worker (UDP Sockets e Thread Assíncrona)"]
     end
 
-    subgraph Core_Engine ["Módulo Core / Engine"]
-        GameLoop["GameLoop (Fixed Timestep 60Hz)"]
-        TimeStep["TimeStep / Clock"]
-        EventBus["EventBus / SignalManager"]
+    subgraph Behavioral ["Padrões Comportamentais"]
+        Observer["Observer / Pub-Sub (Barramento de Eventos e Notificações)"]
+        State["State Pattern (FSM de Telas e FSM de Personagens)"]
+        Command["Command Pattern (Mapeamento de Teclas e Ações de Input)"]
     end
 
-    subgraph Input_Module ["Módulo de Entrada (Input)"]
-        InputManager["InputManager"]
-        IInputDevice["<<interface>> IInputDevice"]
-        KeyboardDevice["KeyboardDevice"]
-        GamepadDevice["GamepadXInputDevice"]
+    subgraph Creational ["Padrões Criacionais"]
+        Singleton["Singleton (Game, Display, Configurações e Áudio)"]
+        Flyweight["Flyweight / Factory (Fábrica e Reuso de Sprites de Tiles)"]
     end
+```
 
-    subgraph Physics_Module ["Módulo de Física (Physics)"]
-        PhysicsWorld["PhysicsWorld2D"]
-        CollisionSystem["CollisionSystem (AABB / MTV)"]
-        RigidBody["RigidBody2D"]
-        Collider["Collider2D (Box / Trigger)"]
-    end
+### 8.1 Padrão Singleton
+- **Finalidade:** Assegurar que determinadas classes críticas possuam apenas uma única instância durante toda a vida do processo, fornecendo um ponto global e centralizado de acesso.
+- **Onde é Usado:**
+  - `Game / Jogo`: O controlador mestre do loop principal da aplicação.
+  - `Display`: Gerenciador da janela Pygame, contexto de resolução, tela cheia e viewport.
+  - `Sounds / Audio`: O gerenciador de áudio responsável pela mixagem de canais e sons.
+  - `Settings / Configuracoes`: Estrutura de armazenamento de preferências globais (volumes, teclas, resolução).
+- **Benefício Prático:** Impede conflitos de reinicialização da janela gráfica, duplicações de dispositivos de áudio e garante coerência de configurações entre menus, fases e editor.
 
-    subgraph Entities_Module ["Módulo de Entidades (Entities)"]
-        EntityManager["EntityManager"]
-        Entity["Entity (Base)"]
-        Actor["Actor (Pawn)"]
-        Player["Player (Scrappy)"]
-        Enemy["Enemy (Base)"]
-        ScrewDrone["ScrewDrone"]
-        HydraulicStomper["HydraulicStomper"]
-        WelderBot["WelderBot"]
-        Projectile["Projectile"]
-        ItemPickup["ItemPickup"]
-    end
+### 8.2 Padrão Observer (Publisher-Subscriber)
+- **Finalidade:** Definir uma dependência um-para-muitos entre objetos, de forma que quando um objeto muda de estado ou dispara um evento, todos os seus dependentes sejam notificados e atualizados automaticamente.
+- **Onde é Usado:**
+  - No módulo de eventos `notify.py` / `EventBus`:
+    - Eventos de colisão e combate (`ENEMY_KILLED`, `PLAYER_DAMAGED`, `ITEM_COLLECTED`);
+    - O subsistema de física emite os eventos sem conhecer a existência da interface gráfica (`HUD`) ou do sistema de áudio (`AudioManager`), que apenas assinam esses canais e reagem tocando sons ou somando pontos no placar;
+    - Eventos de rede (`NETWORK_PLAYER_JOINED`, `NETWORK_PLAYER_LEFT`).
+- **Benefício Prático:** Elimina o forte acoplamento entre a mecânica pura do jogo e os subsistemas auxiliares de interface, áudio e rede.
 
-    subgraph Graphics_Module ["Módulo Gráfico e Renderização"]
-        Renderer2D["Renderer2D"]
-        Camera2D["Camera2D (SmoothFollow / Shake)"]
-        SpriteSheet["SpriteSheet / TextureAtlas"]
-        AnimationController["AnimationController (FSM)"]
-        ParallaxScroller["ParallaxScroller"]
-    end
+### 8.3 Padrão State (Máquina de Estados Finita - FSM)
+- **Finalidade:** Permitir que um objeto altere seu comportamento quando seu estado interno muda, parecendo ter mudado de classe.
+- **Onde é Usado:**
+  1. **Estados Globais do Jogo (`GameState`):**
+     - O jogo transita entre `MENU_PRINCIPAL`, `CONFIGURACOES`, `EDITOR_FASES`, `LOBBY_MULTIPLAYER`, `JOGANDO_SOLO`, `JOGANDO_MULTI`, `PAUSA`, `GAME_OVER` e `VITORIA`. Cada estado possui seus próprios métodos `processar_input()`, `atualizar()` e `renderizar()`.
+  2. **Estados do Personagem (`CharacterState`):**
+     - As entidades controláveis e inimigos operam sob estados discretos: `IDLE`, `RUNNING`, `JUMPING`, `FALLING`, `DASHING`, `CROUCHING`, `HURT` e `DEAD`.
+- **Benefício Prático:** Substitui longos blocos aninhados de `if/elif/else` por lógica isolada, previsível e facilmente extensível.
 
-    subgraph Audio_Module ["Módulo de Áudio"]
-        AudioManager["AudioManager"]
-        SoundBank["SoundBank (SFX WAV/OGG)"]
-        MusicStreamer["MusicStreamer (BGM Stream)"]
-    end
+### 8.4 Padrão Flyweight / Factory (Fábrica de Tiles e Entidades)
+- **Finalidade:** Suportar eficientemente grandes quantidades de objetos granulares, compartilhando partes comuns do estado intrínseco (texturas/superfícies) e separando o estado extrínseco (coordenadas (X, Y)).
+- **Onde é Usado:**
+  - Classes `TileMap`, `Tile` e `Pallet`:
+    - Em um mapa com 100 por 30 (3000 blocos) blocos, carregar 3000 superfícies idênticas de textura sobrecarregaria a memória;
+    - A fábrica carrega cada sprite único uma única vez na memória gráfica. O grid de fase armazena apenas inteiros de identificação (ex.: `1 = Bloco de Aço`, `2 = Esteira Rolante`, `3 = Espinho`);
+    - Ao renderizar, o motor consulta o Flyweight pelo ID e desenha a textura na posição correspondente da matriz.
+- **Benefício Prático:** Redução drástica do consumo de memória RAM e aceleração das operações de desenho e persistência.
 
-    subgraph World_Module ["Módulo de Mundo e Fases"]
-        SceneManager["SceneManager"]
-        Level["Level / Sector01"]
-        Tilemap["Tilemap2D (Tiled JSON Loader)"]
-    end
+### 8.5 Padrão Command (Desacoplamento de Input)
+- **Finalidade:** Encapsular uma requisição como um objeto, permitindo parametrizar clientes com diferentes requisições, enfileirar ou registrar requisições.
+- **Onde é Usado:**
+  - No módulo `input.py` / `InputManager`:
+    - Teclas físicas (`pygame.K_a`, `pygame.K_SPACE`, eixos de analógico de controle) são mapeadas para comandos de alto nível (`MoverEsquerdaCommand`, `PularCommand`, `AtirarCommand`, `DashCommand`);
+    - Permite remapeamento transparente de controles nas opções sem alterar uma única linha da física do personagem;
+    - No modo Multiplayer, permite serializar o comando e replicá-lo no robô remoto com facilidade.
 
-    subgraph UI_Module ["Módulo de Interface (UI)"]
-        HUD["HUDOverlay (HP, Ammo, Score)"]
-        MenuSystem["MenuSystem (Pause, GameOver)"]
-    end
+### 8.6 Padrão Arquitetural Client-Server e Thread Worker
+- **Finalidade:** Separar a autoridade de orquestração de rede do cliente de renderização, delegando tarefas bloqueantes de I/O de sockets a threads de trabalho em segundo plano.
+- **Onde é Usado:**
+  - Módulos `server.py` e `client.py`:
+    - O servidor centraliza o recebimento de mensagens UDP e faz broadcast aos clientes cadastrados;
+    - O cliente mantém uma `threading.Thread` de escuta contínua de datagramas UDP protegida por `threading.Lock`, impedindo que a espera por pacotes de rede congele a taxa de 60 FPS do motor gráfico.
 
-    %% Relacionamentos e Fluxo
-    Main --> GameLoop
-    GameLoop --> InputManager
-    GameLoop --> PhysicsWorld
-    GameLoop --> EntityManager
-    GameLoop --> SceneManager
-    GameLoop --> Renderer2D
-    GameLoop --> AudioManager
+---
 
-    InputManager --> IInputDevice
-    KeyboardDevice -->|implementa| IInputDevice
-    GamepadDevice -->|implementa| IInputDevice
+## 9. SISTEMA DE MENUS E INTERFACE DO USUÁRIO
 
-    PhysicsWorld --> CollisionSystem
-    PhysicsWorld --> RigidBody
-    RigidBody --> Collider
+### 9.1 Arquitetura e Navegação dos Menus
 
-    EntityManager --> Entity
-    Actor -->|herda| Entity
-    Player -->|herda| Actor
-    Enemy -->|herda| Actor
-    ScrewDrone -->|herda| Enemy
-    HydraulicStomper -->|herda| Enemy
-    WelderBot -->|herda| Enemy
-    Projectile -->|herda| Entity
-    ItemPickup -->|herda| Entity
+Inspirado na classe `Basic_menu_all` do repositório `tac3`, o sistema de menus foi concebido de forma minimalista, responsiva e acessível por teclado, mouse ou gamepad. Cada menu renderiza seu próprio plano de fundo estilizado, caixas de seleção retangulares translúcidas e ícones com animação suave de rotação ou pulsação.
 
-    Player -.-> RigidBody
-    Player -.-> InputManager
-    Actor --> AnimationController
-    AnimationController --> SpriteSheet
-
-    SceneManager --> Level
-    Level --> Tilemap
-    Tilemap --> CollisionSystem
-    Level --> ParallaxScroller
-
-    Renderer2D --> Camera2D
-    Renderer2D --> ParallaxScroller
-    Renderer2D --> HUD
-    Renderer2D --> MenuSystem
-
-    EventBus -.-> AudioManager
-    EventBus -.-> HUD
+```mermaid
+graph TD
+    Splash["Tela Inicial / Splash"] --> MainMenu["Menu Principal"]
+    
+    MainMenu -->|Opção 1| SinglePlay["Novo Jogo (Modo Solo)"]
+    MainMenu -->|Opção 2| MultiMenu["Menu Multiplayer LAN"]
+    MainMenu -->|Opção 3| EditorMenu["Menu do Editor de Fases"]
+    MainMenu -->|Opção 4| ConfigMenu["Menu de Configurações"]
+    MainMenu -->|Opção 5| CreditsMenu["Créditos e Sobre"]
+    MainMenu -->|Opção 6| Quit["Sair do Jogo"]
+    
+    MultiMenu -->|Hospedar| HostLobby["Lobby do Servidor (Host)"]
+    MultiMenu -->|Entrar| JoinInput["Entrar via IP / Porta"]
+    JoinInput --> ClientLobby["Lobby do Cliente"]
+    HostLobby -->|Iniciar Partida| GameCoop["Partida Cooperativa LAN"]
+    ClientLobby --> GameCoop
+    
+    EditorMenu -->|Novo Mapa| EditorScreen["Tela de Edição do Grid"]
+    EditorMenu -->|Carregar Mapa| LoadMap["Seletor de Fases (.npz)"]
+    LoadMap --> EditorScreen
+    EditorScreen -->|Atalho 'T'| Playtest["Modo Playtest"]
+    Playtest -->|Tecla ESC| EditorScreen
+    
+    SinglePlay --> GameSolo["Partida Solo"]
+    GameSolo -->|Tecla ESC| PauseMenu["Menu de Pausa"]
+    GameCoop -->|Tecla ESC| PauseMenu
+    PauseMenu -->|Continuar| GameSolo
+    PauseMenu -->|Reiniciar| GameSolo
+    PauseMenu -->|Menu Principal| MainMenu
 ```
 
 ---
 
-## 9. DIAGRAMA DE DEPENDÊNCIAS ESTRUTURAIS PARA ENTIDADES (CLASSES UML)
+### 9.2 Menu Principal
 
-O diagrama UML abaixo apresenta a modelagem orientada a objetos das entidades do jogo, destacando herança, realização de interfaces (`IUpdatable`, `IDrawable`, `ICollidable`, `IDamageable`), composição de componentes de física/armas e enumerações de estados.
+O Menu Principal apresenta as opções centrais de entrada no jogo com tipografia retro industrial e efeitos de iluminação:
+
+| Opção | Ação Executada | Destino |
+| :--- | :--- | :--- |
+| **1. NOVO JOGO** | Inicia a campanha solo tradicional com Scrappy no Setor 01. | `CenaJogo(modo=SOLO)` |
+| **2. MULTIPLAYER LAN** | Abre o painel de conexão em rede local para 2 jogadores. | `MenuMultiplayer` |
+| **3. EDITOR DE FASES** | Abre o criador e manipulador de mapas personalizados. | `MenuEditor` |
+| **4. CONFIGURAÇÕES** | Abre opções de som, tela cheia e mapeamento de controles. | `MenuConfiguracoes` |
+| **5. CRÉDITOS** | Exibe informações acadêmicas, docente, discente e licenças. | `TelaCreditos` |
+| **6. SAIR** | Encerra com segurança o loop do jogo e fecha a janela. | Finaliza processo |
+
+---
+
+### 9.3 Menu Multiplayer em LAN
+
+Dedicado à configuração da sessão em rede local:
+
+1. **Hospedar Partida (Host):**
+   - Inicia o socket servidor na porta padrão `5555`;
+   - Identifica e exibe na tela o IP local da máquina na rede (ex.: `192.168.1.105:5555`);
+   - Aguarda o sinal de entrada do Jogador 2 (Byte);
+   - Exibe o botão **"Iniciar Partida"** liberado assim que o parceiro conecta.
+2. **Entrar em Partida (Join):**
+   - Campo de entrada de texto interativo para inserção do **IP do Servidor** (com suporte a *paste* e preenchimento automático de `127.0.0.1` para testes na mesma máquina);
+   - Campo para inserção de **Porta** (padrão `5555`);
+   - Botão **"Conectar"** que envia o pacote de apresentação `player_2,join`.
+3. **Lobby de Espera:**
+   - Mostra o avatar animado de Scrappy (P1) e Byte (P2) lado a lado;
+   - Indicador de latência (ping em ms);
+   - Indicadores de "Pronto" para ambos os participantes.
+
+---
+
+### 9.4 Menu de Configurações (Options)
+
+Permite ajustar preferências em tempo de execução sem reiniciar o jogo:
+
+- **Controle de Áudio:**
+  - Volume Geral (*Master Volume*): Slider de 0% a 100%;
+  - Volume da Música (*BGM*): Slider de 0% a 100%;
+  - Volume dos Efeitos Sonoros (*SFX*): Slider de 0% a 100%.
+- **Opções de Vídeo e Tela:**
+  - Resolução da Janela: Seleção entre 960x540, 1280x720 e 1920x1080;
+  - Modo de Exibição: Janela (*Windowed*) vs Tela Cheia (*Fullscreen*);
+  - Sincronização Vertical (*V-Sync*): Ativado / Desativado (limite cravado em 60 FPS).
+- **Controles e Atalhos:**
+  - Visualização gráfica de todas as teclas associadas e possibilidade de alternar entre esquemas Teclado ABNT2, WASD e Gamepad.
+
+---
+
+### 9.5 Menu de Pausa e Telas de Fim de Partida
+
+- **Menu de Pausa (In-Game Pause):**
+  - Acionado via tecla `ESC` ou botão `Start`;
+  - Congela o Fixed Timestep da simulação de física;
+  - Opções: *Continuar*, *Reiniciar Nível*, *Configurações Rápidas* e *Voltar ao Menu Principal*.
+- **Tela de Game Over:**
+  - Exibida quando o robô esgota suas vidas (ou quando ambos caem no cooperativo);
+  - Exibe a pontuação final atingida e botões: *Tentar Novamente (R)* ou *Menu Principal (ESC)*.
+- **Tela de Vitória do Setor:**
+  - Exibida ao cruzar o portal de extração no fim da fase;
+  - Exibe tempo total, parafusos coletados, inimigos destruídos e cálculo de bônus de pontuação.
+
+---
+
+## 10. EDITOR DE FASES (LEVEL MAKER)
+
+### 10.1 Visão Geral e Filosofia de Design
+
+O **Editor de Fases** é inspirado na estrutura modular do pacote `maker` do repositório `tac3` (`editor.py`, `grid.py`, `pallet.py`, `button.py`, `info.py`, `scroll.py`). Seu objetivo é permitir a concepção e prototipação ágil de novos desafios sem necessidade de edição manual de código ou arquivos externos.
+
+```
++-------------------------------------------------------------------------+
+| [Info: Grid (14, 08) | Tile: Esteira Dir (ID: 03) | Zoom: 1.0x]         |
++-------------------------------------------------------------------------+
+|                                                           | [ PALETA ]  |
+|                       ÁREA DO GRID                        | [B1] [B2]   |
+|                                                           | [B3] [B4]   |
+|         [Robô P1] ----> [Esteira >>>] ----> [Espinhos]    | [E1] [E2]   |
+|                                                           | [I1] [I2]   |
+|                                                           | [Portal]    |
+|                                                           |             |
++-------------------------------------------------------------------------+
+| [Salvar Mapa]  [Carregar Mapa]  [Limpar Grid]  [Testar Fase (T)] [Sair] |
++-------------------------------------------------------------------------+
+```
+
+---
+
+### 10.2 Componentes do Editor
+
+1. **`Editor`:** Classe orquestradora central que inicializa os componentes, controla o loop de renderização da interface do criador e gerencia eventos de entrada.
+2. **`Grid`:** Grade bidimensional que mapeia o espaço contínuo da tela em células discretas de tamanho uniforme (32x32 pixels), mantendo a matriz de dados `map_data[camada][y][x]`.
+3. **`Pallet` (Paleta de Elementos):** Barra lateral contendo as miniaturas dos tiles e objetos disponíveis para inserção, organizados por abas:
+   - *Blocos de Terreno:* Aço antiderrapante, bloco de sucata destrutível, esteira rolante (esquerda/direita), espinhos;
+   - *Spawns:* Ponto de surgimento do Jogador 1 (Scrappy), Jogador 2 (Byte) e Portal de Saída;
+   - *Inimigos:* Drone Parafuso, Prensa Bípede, Robô Soldador;
+   - *Coletáveis:* Óleo Sintético (+1 HP), Parafuso Dourado (+100 pts), Bateria de Plasma (Arma Spread).
+4. **`Button`:** Elementos interativos de interface gráfica com suporte a clique, ícone e mensagem de feedback textual (*tooltip*).
+5. **`Info`:** Painel informativo exibido no topo da tela, reportando as coordenadas da célula sob o mouse, dimensões totais da fase e ID do elemento ativo.
+6. **`Scroll`:** Controlador de deslocamento da câmera do editor, permitindo navegar horizontalmente e verticalmente por mapas extensos.
+
+---
+
+### 10.3 Ferramentas e Mapeamento de Interação do Mouse
+
+| Comando / Ação | Ação no Editor | Descrição do Comportamento |
+| :--- | :--- | :--- |
+| **Botão Esquerdo do Mouse (LMB)** | **Pintar / Inserir** | Insere o elemento selecionado na paleta na célula sob o cursor do mouse. Ao manter pressionado e arrastar, pinta múltiplos blocos. |
+| **Botão Direito do Mouse (RMB)** | **Apagar / Borracha** | Remove qualquer bloco ou entidade da célula apontada, definindo seu valor como 0 (vazio). |
+| **Scroll do Mouse (Roda)** | **Rolagem Horizontal** | Desloca a visão da grade para a esquerda ou direita do mapa. |
+| **Shift + Scroll do Mouse** | **Rolagem Vertical** | Desloca a visão da grade para cima ou para baixo. |
+| **Botão Central do Mouse (MMB)** | **Arrastar Câmera (Pan)** | Move a área visível do mapa livremente enquanto o botão estiver pressionado. |
+| **Teclas `W`, `A`, `S`, `D` ou Setas** | **Navegação no Mapa** | Rolagem suave da câmera pelas extremidades da fase. |
+| **Tecla `T` ou Botão "Testar"** | **Playtest Imediato** | Transita instantaneamente para a simulação física com Scrappy no spawn do mapa. |
+| **Tecla `ESC`** | **Voltar** | Sai do modo playtest de volta ao editor, ou do editor de volta ao menu. |
+
+---
+
+### 10.4 Estrutura de Dados e Persistência (.npz / JSON)
+
+Para assegurar máxima velocidade de gravação e carregamento sem perda de legibilidade, o editor suporta exportação em dois formatos:
+
+#### A. Formato Binário Compactado (`.npz` - NumPy Compressed)
+O mapa é armazenado como um arquivo de matrizes compactadas do NumPy:
+- `layer_terrain`: Matriz de Altura x Largura (H x W) contendo os IDs dos blocos sólidos e esteiras;
+- `layer_entities`: Matriz de Altura x Largura (H x W) contendo os IDs de inimigos, itens e pontos de spawn;
+- `metadata`: Dicionário serializado com nome do criador, gravidade base e tema sonoro.
+
+#### B. Formato Aberto (`.json`)
+```json
+{
+  "nome_fase": "Setor_Personalizado_01",
+  "autor": "Vitor de Souza",
+  "largura": 100,
+  "altura": 20,
+  "tile_size": 32,
+  "player_spawn": [64, 480],
+  "exit_portal": [3100, 480],
+  "camada_terreno": [
+    [0, 0, 0, 1, 1, 1, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1]
+  ],
+  "entidades": [
+    {"tipo": "screw_drone", "x": 400, "y": 300},
+    {"tipo": "welder_bot", "x": 850, "y": 480},
+    {"tipo": "gold_screw", "x": 250, "y": 400}
+  ]
+}
+```
+
+---
+
+### 10.5 Modo de Teste Integrado (Playtest)
+Ao pressionar o botão **"Testar Fase"** ou a tecla `T`, o editor congela o estado de edição, compila o grafo de colisões e instancia o motor de física tradicional com o personagem no ponto de spawn definido. O desenvolvedor/jogador pode testar a distância dos saltos, a altura dos tetos e o posicionamento de inimigos em tempo real. Pressionar `ESC` encerra o teste e restaura o editor exatamente no ponto em que estava.
+
+---
+
+## 11. ARQUITETURA MULTIPLAYER EM LAN (CLIENTE E SERVIDOR)
+
+### 11.1 Topologia de Rede e Protocolo UDP
+
+Para jogos de ação frenética em 2D (*Run and Gun*), onde o ritmo de disparo e esquiva de projéteis exige latência imperceptível, adota-se o protocolo **UDP (`socket.SOCK_DGRAM`)** operando em topologia **Cliente-Servidor Autoritativo/Relay** na rede local:
+
+- **Por que UDP em vez de TCP?**
+  - O TCP impõe sobrecarga de *three-way handshake*, confirmações obrigatórias de entrega (ACKs) e controle de congestionamento. No caso de perda ocasional de um pacote de posição em LAN, o TCP travaria todo o fluxo de dados subsequente para retransmitir um dado de posição que já estaria obsoleto.
+  - O UDP envia datagramas diretos e instantâneos. Caso um pacote se perca, o pacote seguinte (enviado 16ms depois) já contém a posição mais atualizada.
+
+---
+
+### 11.2 Servidor Dedicado / Listen Server em LAN
+
+O servidor pode ser executado como um processo autônomo (`server.py`) ou embutido (*Listen Server* na máquina do Jogador 1):
+
+1. **Ciclo de Operação do Servidor:**
+   - Cria o socket UDP e executa `server_socket.bind((HOST, PORT))` na porta `5555`;
+   - Configura timeout não-bloqueante (`server_socket.settimeout(1.0)`);
+   - Mantém o registro de clientes ativos em dicionário:
+     ```python
+     clients = {
+         "player_1": {"address": ("192.168.1.100", 50123), "last_seen": 1732381200.4},
+         "player_2": {"address": ("192.168.1.108", 50456), "last_seen": 1732381200.5}
+     }
+     ```
+2. **Distribuição em Broadcast:**
+   - Ao receber uma mensagem de um cliente, o servidor atualiza seu `last_seen` e faz o reenvio (*broadcast*) imediato para todos os outros clientes conectados na sessão.
+3. **Gerenciamento de Inatividade (Timeout):**
+   - O servidor verifica a cada segundo a diferença `time.time() - c_info["last_seen"]`;
+   - Se um cliente permanecer silencioso por mais de `5.0` segundos (`TIMEOUT_LIMIT`), ele é considerado desconectado: o servidor o remove da lista e emite o pacote especial `player_id,remove` para que os demais clientes excluam seu avatar da tela.
+
+---
+
+### 11.3 Cliente LAN e Thread de Recepção Assíncrona
+
+No lado do cliente (`client.py`):
+
+1. **Desacoplamento do Loop Gráfico:**
+   - A recepção de rede roda em uma thread dedicada (`threading.Thread(target=network_receiver)`);
+   - Isso garante que qualquer atraso transitório no socket nunca trave a renderização de 60 FPS do Pygame.
+2. **Sincronização Thread-Safe:**
+   - Um semáforo de exclusão mútua (`threading.Lock`) protege a leitura e escrita no dicionário compartilhado de jogadores remotos.
+
+---
+
+### 11.4 Protocolo de Mensagens CSV Compacto
+
+O protocolo de comunicação adota strings compactas separadas por vírgula, mantendo a carga útil (*payload*) abaixo de 64 bytes por datagrama:
+
+| Tipo de Mensagem | Sintaxe do Pacote | Exemplo | Descrição do Efeito |
+| :--- | :--- | :--- | :--- |
+| **Entrada / Conexão** | `ID,join,x,y` | `player_2,join,120,480` | Notifica o servidor e cria o robô na partida. |
+| **Sincronismo de Posição** | `ID,x,y,state,facing` | `player_1,340,210,run,1` | Atualiza coordenadas, animação e direção. |
+| **Disparo de Projétil** | `ID,shoot,dir_x,dir_y,arma` | `player_1,shoot,1,0,plasma` | Replica o tiro do parceiro com mesma balística. |
+| **Dano Sofrido** | `ID,hit,dano,hp_atual` | `player_2,hit,1,2` | Sincroniza perda de integridade no HUD comum. |
+| **Saída Voluntária** | `ID,quit` | `player_2,quit` | Comunica saída intencional do jogo. |
+| **Remoção por Timeout** | `ID,remove` | `player_2,remove` | Servidor ordena a remoção do cliente inativo. |
+
+---
+
+### 11.5 Interpolação Linear de Movimento (LERP) e Resolução de Timeout
+
+Para eliminar o efeito de "teletransporte" decorrente de variações milissegundas na recepção dos pacotes, o cliente utiliza **LERP (*Linear Interpolation*)** sobre as coordenadas de renderização do parceiro:
+
+O cliente local armazena `target_x` e `target_y` recebidos da rede e calcula a cada quadro o deslocamento suavizado da posição de renderização (fator de interpolação de 25% por quadro), deslizando o sprite gradualmente em direção ao destino. Isso elimina qualquer efeito de teletransporte brusco mesmo diante de pequenas oscilações de latência em conexões Wi-Fi.
+
+---
+
+### 11.6 Mecânicas de Cooperação, Câmera Compartilhada e Respawn Contínuo
+
+- **Câmera Dinâmica Dupla:** O sistema de câmera calcula continuamente o ponto médio horizontal entre Scrappy e Byte (média aritmética das posições de P1 e P2). A câmera ajusta o enquadramento horizontal para manter ambos os robôs visíveis dentro de uma zona de conforto com margem mínima de 100 pixels das bordas da tela.
+- **Reaparecimento Contínuo (Respawn Cooperativo):** No modo multiplayer LAN, quando um dos robôs perde todo o HP ou cai no abismo, ele **não é desconectado nem enviado para uma tela de Game Over solo**. Em vez disso, o sistema executa o reaparecimento (*respawn*) automático imediatamente nas proximidades do parceiro sobrevivente (ou no ponto de início caso ambos caiam), restaurando sua integridade máxima com 2 segundos de invulnerabilidade temporária (*i-frames* piscantes). As novas coordenadas são sincronizadas instantaneamente via pacotes UDP, mantendo os dois jogadores sempre conectados na mesma partida cooperativa.
+
+---
+
+## 12. DIAGRAMAS ESTRUTURAIS E DE APOIO ATUALIZADOS
+
+### 12.1 Diagrama de Estrutura de Pacotes/Módulos
+
+O diagrama abaixo apresenta a arquitetura modular completa do sistema para o Trabalho 2, incorporando os módulos de Editor de Fases (`Maker_Module`), Comunicação em Rede (`Network_Module`), Gerenciamento de Menus (`Menu_Module`) e Barramento de Eventos (`Events_Module`).
+
+```mermaid
+graph TD
+    subgraph Layer1 ["1. Camada de Inicialização e Core"]
+        Main["Main (main.py)"] --> Game["Game (jogo.py)"]
+        Game --> GameLoop["GameLoop (Fixed 60Hz)"]
+        GameLoop --> Display["Display (display.py)"]
+        GameLoop --> Notify["Notify / EventBus (notify.py)"]
+    end
+
+    subgraph Layer2 ["2. Subsistemas de Gestão e Extensões (Trabalho 2)"]
+        subgraph Menu_Sub ["Módulo de Menus (source/modules/ui)"]
+            BasicMenu["BasicMenu (menu.py)"]
+            MainMenu["MainMenu"]
+            MultiMenu["MultiplayerMenu"]
+            ConfigMenu["ConfigMenu (settings.py)"]
+            BasicMenu --> MainMenu
+            BasicMenu --> MultiMenu
+            BasicMenu --> ConfigMenu
+        end
+
+        subgraph Maker_Sub ["Módulo do Editor (source/modules/maker)"]
+            Editor["Editor (editor.py)"]
+            Grid["Grid (grid.py)"]
+            Pallet["Pallet (pallet.py)"]
+            Editor --> Grid
+            Editor --> Pallet
+        end
+
+        subgraph Net_Sub ["Módulo de Rede LAN (source/modules/network)"]
+            LanServer["LanServer (server.py)"]
+            LanClient["LanClient (client.py)"]
+            NetReceiver["ReceiverThread (UDP)"]
+            LanClient --> NetReceiver
+        end
+    end
+
+    subgraph Layer3 ["3. Camada de Simulação, Física e Recursos"]
+        subgraph Ent_Sub ["Módulo de Entidades"]
+            Player["Player (Scrappy / Byte)"]
+            Enemies["Inimigos (Drones, Prensas, Soldadores)"]
+            Projectiles["Projéteis"]
+        end
+
+        subgraph Phys_Sub ["Física e Colisão"]
+            Physics["PhysicsWorld2D"]
+            Collision["Colisão AABB + Bitmask"]
+            Physics --> Collision
+        end
+
+        subgraph Res_Sub ["Áudio e Configurações"]
+            Sounds["Sounds / Audio (sounds.py)"]
+            Settings["Settings (config.json)"]
+        end
+    end
+
+    GameLoop --> Menu_Sub
+    GameLoop --> Maker_Sub
+    GameLoop --> Net_Sub
+
+    Net_Sub --> Ent_Sub
+    Ent_Sub --> Phys_Sub
+    Notify --> Res_Sub
+```
+
+---
+
+### 12.2 Diagrama de Classes UML Completo
+
+O diagrama de classes orientadas a objetos reflete as novas classes do Editor de Fases, Servidor/Cliente LAN e o Sistema de Menus:
 
 ```mermaid
 classDiagram
@@ -544,7 +710,7 @@ classDiagram
 
     class IDrawable {
         <<interface>>
-        +draw(renderer: Renderer2D) void
+        +draw(surface: Surface) void
     }
 
     class ICollidable {
@@ -553,191 +719,301 @@ classDiagram
         +onCollision(other: ICollidable, mtv: Vector2) void
     }
 
-    class IDamageable {
-        <<interface>>
-        +takeDamage(amount: int, knockbackDir: Vector2) void
-        +getHealth() int
-        +isDead() bool
+    %% Singletons Core
+    class Game {
+        -instance: Game
+        -currentState: GameState
+        -running: bool
+        -clock: Clock
+        +init() void
+        +changeState(newState: GameState) void
+        +executar() void
     }
 
-    %% Enumerações
-    class CharacterState {
-        <<enumeration>>
-        IDLE
-        RUNNING
-        JUMPING
-        FALLING
-        DASHING
-        CROUCHING
-        HURT
-        DEAD
+    class Display {
+        -instance: Display
+        +size: tuple
+        +screen: Surface
+        +createDisplay(w: int, h: int, fullscreen: bool) void
     }
 
-    class WeaponType {
-        <<enumeration>>
-        PLASMA_RIVETER_DEFAULT
-        SPREAD_SHOT_TRIPLE
-        HEAVY_BOLT_CANNON
+    class EventBus {
+        -listeners: dict
+        +subscribe(event: string, callback: function) void
+        +emit(event: string, data: any) void
     }
 
-    %% Componentes Auxiliares
-    class Vector2 {
-        +x: float
-        +y: float
-        +normalize() Vector2
-        +length() float
+    %% Classes de Menus
+    class BasicMenu {
+        #options: list~str~
+        #selectedIdx: int
+        #font: Font
+        +handleInput() void
+        +update(dt: float) void
+        +draw(surface: Surface) void
     }
 
-    class AABB {
-        +min: Vector2
-        +max: Vector2
-        +intersects(other: AABB) bool
-        +calculateMTV(other: AABB) Vector2
+    class MainMenu {
+        +onSelectOption(idx: int) void
     }
 
-    class RigidBody2D {
-        +velocity: Vector2
-        +acceleration: Vector2
-        +mass: float
-        +isGrounded: bool
-        +gravityScale: float
-        +applyForce(force: Vector2) void
-        +applyImpulse(impulse: Vector2) void
-        +integrate(dt: float) void
+    class MultiplayerMenu {
+        -ipInput: string
+        -portInput: int
+        +hostServer() void
+        +joinServer() void
     }
 
-    class WeaponSystem {
-        +currentWeapon: WeaponType
-        +fireCooldownTimer: float
-        +ammoCount: int
-        +fire(origin: Vector2, aimAngle: float) Projectile
-        +switchWeapon(newWeapon: WeaponType) void
+    class SettingsMenu {
+        -volumeMaster: float
+        -volumeBGM: float
+        -volumeSFX: float
+        +applySettings() void
     }
 
-    %% Hierarquia de Entidades
+    %% Classes do Editor de Fases (Maker)
+    class Editor {
+        -grid: Grid
+        -pallet: Pallet
+        -info: Info
+        -scroll: Scroll
+        -buttons: list~Button~
+        -levelIndex: int
+        +create() void
+        +handleEvents() void
+        +saveMap(filename: string) void
+        +loadMap(filename: string) void
+        +startPlaytest() void
+    }
+
+    class Grid {
+        -matrixData: list
+        -tileSize: int
+        -cols: int
+        -rows: int
+        +setTile(col: int, row: int, tileId: int) void
+        +getTile(col: int, row: int) int
+        +draw(surface: Surface, offset: Vector2) void
+    }
+
+    class Pallet {
+        -tileMap: TileMap
+        -selectedTileId: int
+        +selectTile(id: int) void
+        +draw(surface: Surface) void
+    }
+
+    class Button {
+        +rect: Rect
+        +text: string
+        +icon: Surface
+        +isClicked(mousePos: tuple) bool
+        +draw(surface: Surface) void
+    }
+
+    %% Classes de Rede (Multiplayer LAN)
+    class LanServer {
+        -serverSocket: socket
+        -clients: dict
+        -running: bool
+        +startServer(port: int) void
+        +broadcast(data: bytes, senderAddress: tuple) void
+        +checkTimeouts() void
+        +stopServer() void
+    }
+
+    class LanClient {
+        -clientSocket: socket
+        -serverAddress: tuple
+        -playerId: string
+        -receiverThread: Thread
+        -dataLock: Lock
+        -remotePlayers: dict
+        +connect(ip: string, port: int) void
+        +sendState(x: int, y: int, state: string, dir: int) void
+        +sendShoot(angle: float, weapon: string) void
+        +disconnect() void
+    }
+
+    class RemotePlayerProxy {
+        +playerId: string
+        +currentPos: Vector2
+        +targetPos: Vector2
+        +lerpFactor: float
+        +updateLerp(dt: float) void
+        +draw(surface: Surface) void
+    }
+
+    %% Entidades Base
     class Entity {
         <<abstract>>
-        #id: int
         #position: Vector2
         #isActive: bool
-        +init() void
-        +update(dt: float) void
-        +draw(renderer: Renderer2D) void
-        +getPosition() Vector2
-        +destroy() void
-    }
-
-    class Actor {
-        <<abstract>>
-        #rigidBody: RigidBody2D
-        #currentState: CharacterState
-        #facingDirection: int
-        #maxHealth: int
-        #currentHealth: int
-        #invulnerabilityTimer: float
-        +changeState(newState: CharacterState) void
-        +takeDamage(amount: int, knockbackDir: Vector2) void
+        +update(dt: float)* void
+        +draw(surface: Surface)* void
     }
 
     class Player {
-        -weaponSystem: WeaponSystem
-        -coyoteTimer: float
-        -jumpBufferTimer: float
-        -dashCooldownTimer: float
-        -isDashing: bool
-        -canDoubleJump: bool
-        -score: int
-        -collectedScraps: int
-        +handleInput(input: InputManager) void
-        +jump() void
-        +cutJump() void
-        +performDash() void
-        +shoot() void
-        +addScore(points: int) void
-        +collectItem(item: ItemPickup) void
-    }
-
-    class Enemy {
-        <<abstract>>
-        #scoreValue: int
-        #patrolSpeed: float
-        #detectionRange: float
-        #attackCooldown: float
-        +updateAI(target: Player, dt: float)* void
-        +attack()* void
-    }
-
-    class ScrewDrone {
-        -verticalOscillationSpeed: float
-        -oscillationAmplitude: float
-        -flightHeight: float
-        +updateAI(target: Player, dt: float) void
-        +attack() void
-    }
-
-    class HydraulicStomper {
-        -isShieldActive: bool
-        -stompChargeTimer: float
-        +updateAI(target: Player, dt: float) void
-        +attack() void
-        +generateShockwave() void
-    }
-
-    class WelderBot {
-        -torchActive: bool
-        -torchDuration: float
-        +updateAI(target: Player, dt: float) void
-        +attack() void
-    }
-
-    class Projectile {
+        -characterState: CharacterState
+        -health: int
         -speed: float
-        -damage: int
-        -direction: Vector2
-        -lifeTimer: float
-        -ownerTag: string
-        +onCollision(other: ICollidable, mtv: Vector2) void
+        -isGrounded: bool
+        +handleInput() void
+        +jump() void
+        +dash() void
+        +shoot() void
     }
 
-    class ItemPickup {
-        -itemType: string
-        -value: int
-        +onCollision(other: ICollidable, mtv: Vector2) void
-        +applyEffect(player: Player) void
-    }
-
-    %% Realizações de Interfaces
+    %% Relações e Heranças
     Entity ..|> IUpdatable
     Entity ..|> IDrawable
-    Actor ..|> ICollidable
-    Actor ..|> IDamageable
-    Projectile ..|> ICollidable
-    ItemPickup ..|> ICollidable
+    Player --|> Entity
+    RemotePlayerProxy --|> Entity
+    Player ..|> ICollidable
 
-    %% Heranças
-    Entity <|-- Actor
-    Entity <|-- Projectile
-    Entity <|-- ItemPickup
-    Actor <|-- Player
-    Actor <|-- Enemy
-    Enemy <|-- ScrewDrone
-    Enemy <|-- HydraulicStomper
-    Enemy <|-- WelderBot
+    BasicMenu <|-- MainMenu
+    BasicMenu <|-- MultiplayerMenu
+    BasicMenu <|-- SettingsMenu
 
-    %% Associações e Composições
-    Actor *-- RigidBody2D
-    Actor *-- CharacterState
-    Player *-- WeaponSystem
-    WeaponSystem *-- WeaponType
-    RigidBody2D *-- Vector2
-    Player ..> Projectile : instantiates
-    Enemy ..> Projectile : instantiates
+    Game *-- Display
+    Game *-- EventBus
+    Game *-- BasicMenu
+    Game *-- Editor
+    Game *-- LanClient
+
+    Editor *-- Grid
+    Editor *-- Pallet
+    Editor *-- Button
+    LanClient *-- RemotePlayerProxy
 ```
 
 ---
 
-## 10. CONCLUSÃO E CONSIDERAÇÕES FINAIS
+### 12.3 Diagrama de Sequência: Ciclo de Sincronização Multiplayer LAN
 
-O presente documento de Game Design Document (GDD) consolida a especificação técnica e artística completa do jogo **"Rust & Byte: O Despertar da Sucata"**, atendendo com rigor metodológico a todos os critérios definidos para o **Trabalho 1** da disciplina de **Tópicos Avançados em Computação (TAC)** sob orientação do **Prof. Vanderson**.
+Demonstra o fluxo contínuo de envio de comandos de movimentação e disparo pelo Cliente 1, propagação pelo Servidor UDP e interpolação no Cliente 2:
 
-A combinação entre a estética retro em pixel art 16-bit com uma mecânica dinâmica de física semi-implícita em fixed timestep (com atenuação de pulo, gravidade assimétrica e janelas de tolerância *coyote time* e *buffer*) assegura uma experiência fluida, responsiva e divertida, reminiscente dos maiores clássicos do gênero *Run and Gun*. Paralelamente, a modelagem arquitetural baseada em separação estrita de camadas e o diagrama de classes orientado a objetos fornecem a base sólida para a posterior implementação computacional e verificação experimental do sistema de jogo.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor P1 as Jogador 1 (Cliente Local)
+    participant C1 as LanClient (P1)
+    participant S as LanServer (Servidor UDP)
+    participant C2 as LanClient (P2)
+    actor P2 as Jogador 2 (Cliente Remoto)
+
+    Note over P1, C1: Frame de Física (60 FPS)
+    P1->>C1: Pressiona 'D' (Mover para Direita)
+    C1->>C1: Atualiza posição física local (x=450, y=220)
+    C1->>S: Envia datagrama UDP: "player_1,450,220,run,1"
+    
+    Note over S: Processamento Não-Bloqueante
+    S->>S: Atualiza last_seen["player_1"] = timestamp
+    S->>C2: Reenvia UDP (Broadcast): "player_1,450,220,run,1"
+    
+    Note over C2: Thread de Rede Secundária
+    C2->>C2: Recebe pacote na thread com dataLock
+    C2->>C2: Define target_position = (450, 220)
+    
+    Note over C2, P2: Próximo Frame de Renderização
+    C2->>C2: Aplica LERP: current = current + 0.25 * (target - current)
+    C2->>P2: Renderiza sprite de Scrappy (P1) suavemente na tela de P2
+```
+
+---
+
+### 12.4 Diagrama de Sequência: Criação e Salvamento no Editor de Fases
+
+Demonstra a seleção de um bloco na paleta, a inserção na grade via clique de mouse e a persistência em arquivo compactado:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Usuário / Criador
+    participant GUI as Editor de Fases
+    participant Pal as Pallet (Paleta)
+    participant Grd as Grid (Grade)
+    participant File as Sistema de Arquivos (.npz / JSON)
+
+    Dev->>Pal: Clica com botão esquerdo no ícone "Esteira Rolante"
+    Pal->>Pal: Seleciona Tile ID = 3
+    
+    Dev->>Grd: Clica na célula do mapa (Coluna 14, Linha 8)
+    Grd->>Grd: Atualiza matriz: map_data[8][14] = 3
+    Grd->>GUI: Redesenha célula com a textura da Esteira Rolante
+    
+    Dev->>GUI: Clica no botão "Salvar Mapa"
+    GUI->>Grd: Solicita matrizes de terreno e entidades completas
+    Grd-->>GUI: Retorna matriz bidimensional formatada
+    GUI->>File: Serializa dados e comprime em "source/data/lv_custom.npz"
+    File-->>GUI: Confirmação de gravação em disco (< 50ms)
+    GUI->>Dev: Exibe feedback visual: "Mapa Salvo com Sucesso!"
+```
+
+---
+
+### 12.5 Diagrama da Máquina de Estados Global do Jogo
+
+Mapeia os estados macro da aplicação e suas transições:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Splash: Inicialização da Janela e Recursos
+    Splash --> MenuPrincipal: Assets Carregados
+
+    state MenuPrincipal {
+        [*] --> OpcoesMenu
+        OpcoesMenu --> NovoJogoSolo: Seleciona 'Novo Jogo'
+        OpcoesMenu --> MenuMultiplayer: Seleciona 'Multiplayer'
+        OpcoesMenu --> MenuEditor: Seleciona 'Editor de Fases'
+        OpcoesMenu --> MenuConfiguracoes: Seleciona 'Configurações'
+        OpcoesMenu --> [*]: Seleciona 'Sair'
+    }
+
+    MenuConfiguracoes --> MenuPrincipal: Salvar / Voltar
+
+    state MenuMultiplayer {
+        [*] --> ModoRede
+        ModoRede --> ServidorHospedado: Hospedar Partida
+        ModoRede --> ClienteConectando: Entrar via IP/Porta
+        ServidorHospedado --> LobbyEspera: Jogador 2 Conectou
+        ClienteConectando --> LobbyEspera: Conexão Estabelecida
+        LobbyEspera --> ModoRede: Cancelar
+    }
+
+    state EditorFases {
+        [*] --> EdicaoGrade: Carrega Grid e Paleta
+        EdicaoGrade --> ModoPlaytest: Tecla 'T' (Testar)
+        ModoPlaytest --> EdicaoGrade: Tecla 'ESC'
+        EdicaoGrade --> SalvarFase: Clica 'Salvar'
+        SalvarFase --> EdicaoGrade: Arquivo .npz Gravado
+    }
+
+    EditorFases --> MenuPrincipal: Sair do Editor
+
+    NovoJogoSolo --> PartidaAtiva: Inicia Campanha Solo
+    LobbyEspera --> PartidaAtiva: Iniciar Jogo Cooperativo
+
+    state PartidaAtiva {
+        [*] --> GameplayNormal: 60 FPS Simulação
+        GameplayNormal --> Pausado: Tecla 'ESC'
+        Pausado --> GameplayNormal: Continuar
+        GameplayNormal --> GameOver: Vidas Esgotadas (HP = 0)
+        GameplayNormal --> VitoriaFase: Cruzou Portal Final
+    }
+
+    Pausado --> MenuPrincipal: Abandonar Partida
+    GameOver --> PartidaAtiva: Reiniciar Nível (R)
+    GameOver --> MenuPrincipal: Sair (ESC)
+    VitoriaFase --> MenuPrincipal: Concluir
+```
+
+---
+
+## 13. CONCLUSÃO E CONSIDERAÇÕES FINAIS
+
+A presente versão expandida do Game Design Document (GDD) consolida todas as diretrizes técnicas, arquiteturais e de jogabilidade requeridas para o **Trabalho 2** da disciplina de **Tópicos Avançados em Computação (TAC)**, sob orientação do **Prof. Vanderson**.
+
+A introdução do **Editor de Fases (Level Maker)** fornece autonomia de prototipagem através de uma grade matricial interativa de 32x32 pixels, salvamento serializado em formato `.npz` e modo playtest instantâneo. A concepção do subsistema **Multiplayer em LAN (Cliente e Servidor)** através de sockets UDP leves com thread assíncrona desacoplada, interpolação LERP e tratamento de timeout garante uma experiência cooperativa veloz e estável sem impactar o framerate de 60 FPS. 
+
+Por fim, a fundamentação expressa em **Padrões de Projeto (Singleton, Observer, State, Flyweight, Command e Client-Server)** aliada à atualização abrangente dos diagramas estruturais em Mermaid assegura uma modelagem robusta, sustentável e plenamente alinhada com as melhores práticas demonstradas no repositório referencial da disciplina.
