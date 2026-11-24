@@ -101,6 +101,19 @@ class GerenciadorAudio:
             self.som_item = dummy
             self.som_vitoria = dummy
 
+    def definir_volume(self, volume_porcentagem):
+        """Ajusta o volume geral dos efeitos sonoros (0 a 100)."""
+        fator = max(0.0, min(1.0, volume_porcentagem / 100.0))
+        for attr in ("som_pulo", "som_pulo_duplo", "som_tiro", "som_tiro_triplo",
+                     "som_dash", "som_impacto_inimigo", "som_dano_jogador",
+                     "som_item", "som_vitoria"):
+            som = getattr(self, attr, None)
+            if som and hasattr(som, "set_volume"):
+                try:
+                    som.set_volume(fator)
+                except Exception:
+                    pass
+
     def tocar(self, nome_som):
         """Reproduz um som pelo nome do atributo."""
         som = getattr(self, nome_som, None)

@@ -162,10 +162,14 @@ class MenuMultiplayer(MenuBase):
 
 
 class MenuConfiguracoes(MenuBase):
-    """Menu de preferências audiovisuais e técnicas."""
+    """Menu de preferências audiovisuais e técnicas com persistência."""
+    ARQUIVO_CONFIG = "configuracoes_usuario.json"
+
     def __init__(self):
         self.volume_sfx = 100
         self.tela_cheia = False
+        self.carregar_configuracoes()
+
         super().__init__(
             titulo="CONFIGURAÇÕES DO SISTEMA",
             subtitulo="Ajuste volumes de áudio e preferências de exibição",
@@ -177,13 +181,40 @@ class MenuConfiguracoes(MenuBase):
             ]
         )
 
+    def carregar_configuracoes(self):
+        """Carrega preferências salvas em disco."""
+        import json
+        import os
+        if os.path.exists(self.ARQUIVO_CONFIG):
+            try:
+                with open(self.ARQUIVO_CONFIG, "r", encoding="utf-8") as f:
+                    dados = json.load(f)
+                    self.volume_sfx = int(dados.get("volume_sfx", 100))
+                    self.tela_cheia = bool(dados.get("tela_cheia", False))
+            except Exception:
+                pass
+
+    def salvar_configuracoes(self):
+        """Persiste preferências em disco em formato JSON."""
+        import json
+        try:
+            with open(self.ARQUIVO_CONFIG, "w", encoding="utf-8") as f:
+                json.dump({
+                    "volume_sfx": self.volume_sfx,
+                    "tela_cheia": self.tela_cheia
+                }, f, indent=4)
+        except Exception:
+            pass
+
     def alternar_volume(self):
         self.volume_sfx = (self.volume_sfx + 25) % 125
         self.opcoes[0] = f"1. EFEITOS SONOROS (SFX): [ {self.volume_sfx}% ]"
+        self.salvar_configuracoes()
 
     def alternar_tela(self):
         self.tela_cheia = not self.tela_cheia
         self.opcoes[1] = f"2. MODO DE TELA: [ {'TELA CHEIA' if self.tela_cheia else 'JANELA'} ]"
+        self.salvar_configuracoes()
 
 
 class MenuPausa(MenuBase):

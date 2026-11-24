@@ -69,6 +69,9 @@ class Jogo:
         self.menu_config = MenuConfiguracoes()
         self.menu_pausa = MenuPausa()
 
+        # Aplica configurações salvas no startup
+        self.aplicar_configuracoes()
+
         # Rede LAN
         self.servidor_lan = None
         self.cliente_lan = None
@@ -137,6 +140,27 @@ class Jogo:
         if self.servidor_lan:
             self.servidor_lan.parar()
             self.servidor_lan = None
+
+    def aplicar_configuracoes(self):
+        """Aplica modo de exibição (janela/tela cheia) e volume dos efeitos sonoros."""
+        if hasattr(self, "menu_config"):
+            # Ajusta áudio
+            if hasattr(self, "audio") and hasattr(self.audio, "definir_volume"):
+                self.audio.definir_volume(self.menu_config.volume_sfx)
+
+            # Ajusta modo de tela (janela ou fullscreen nativo escalado)
+            try:
+                if self.menu_config.tela_cheia:
+                    self.tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA), pygame.FULLSCREEN | pygame.SCALED)
+                else:
+                    self.tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
+            except Exception:
+                # Fallback caso o driver de vídeo ou ambiente dummy não suporte SCALED
+                try:
+                    flags = pygame.FULLSCREEN if self.menu_config.tela_cheia else 0
+                    self.tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA), flags)
+                except Exception:
+                    self.tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
 
     def reiniciar_fase(self):
         """Reinicia a fase ativa mantendo o modo solo, playtest ou multi."""
@@ -210,8 +234,18 @@ class Jogo:
                 escolha = self.menu_config.tratar_evento(evento)
                 if escolha == 0:
                     self.menu_config.alternar_volume()
+                    self.aplicar_configuracoes()
                 elif escolha == 1:
                     self.menu_config.alternar_tela()
+                    self.aplicar_configuracoes()
+                elif escolha == 2:
+                    # Redefinir controles ou opções
+                    self.menu_config.volume_sfx = 100
+                    self.menu_config.tela_cheia = False
+                    self.menu_config.opcoes[0] = "1. EFEITOS SONOROS (SFX): [ 100% ]"
+                    self.menu_config.opcoes[1] = "2. MODO DE TELA: [ JANELA ]"
+                    self.menu_config.salvar_configuracoes()
+                    self.aplicar_configuracoes()
                 elif escolha == 3 or (evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE):
                     self.estado = ESTADO_MENU_PRINCIPAL
 

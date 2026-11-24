@@ -97,6 +97,9 @@ Trabalho 1/
 ├── Relatorio_GDD_Rust_And_Byte.pdf  # Relatório acadêmico compilado em PDF oficial
 ├── Relatorio_GDD_Trabalho2_TAC.html # Relatório completo em HTML com diagramas vetoriais SVG
 ├── Relatorio_GDD_Trabalho1_TAC.html # Cópia de trabalho sincronizada
+├── Apresentacao_Rust_And_Byte.html  # Apresentação interativa de slides para universidade (16:9)
+├── Apresentacao_Rust_And_Byte.pdf   # Slides compilados em PDF para apresentação/projeção
+├── build_presentation.py            # Script gerador da apresentação de slides
 ├── build_full_report.py             # Script de compilação dos relatórios HTML com SVGs
 └── generate_pdf.sh                  # Utilitário de compilação do PDF via Chrome headless
 ```
